@@ -1,10 +1,6 @@
-from pyggi import Program, Patch, GranularityLevel, TestResult
-from pyggi.atomic_operator import StmtReplacement, StmtInsertion
-from pyggi.custom_operator import StmtDeletion, StmtMoving
-from pyggi.helper import stmt_python
-import ast
-import astor
-import copy
+from pyggi import Patch, TestResult
+from pyggi.astor import Program
+from pyggi.astor import StmtReplacement, StmtInsertion, StmtDeletion, StmtMoving
 import random
 
 # Custom parser for the results of pytest
@@ -20,8 +16,7 @@ def result_parser(stdout, stderr):
         return TestResult(False, None)
 
 # Create new Program instance for 'sample/Triangle_fast_python'
-triangle = Program(
-    "sample/Triangle_fast_python", granularity_level=GranularityLevel.AST)
+triangle = Program("sample/Triangle_fast_python")
 triangle.print_modification_points('triangle.py')
 
 # Set modification weights

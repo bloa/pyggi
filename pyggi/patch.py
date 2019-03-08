@@ -3,9 +3,7 @@ This module contains Patch class.
 """
 import os
 from copy import deepcopy
-from .program import Program, GranularityLevel
-from .atomic_operator import AtomicOperator
-from .custom_operator import CustomOperator
+from .abstract import AbstractAtomicOperator, AbstractCustomOperator
 from .test_result import TestResult
 
 
@@ -117,7 +115,7 @@ class Patch:
         :type edit: :py:class:`.atomic_operator.AtomicOperator` or :py:class:`.custom_operator.CustomOperator`
         :return: None
         """
-        assert isinstance(edit, (AtomicOperator, CustomOperator))
+        assert isinstance(edit, (AbstractAtomicOperator, AbstractCustomOperator))
         assert edit.is_valid_for(self.program)
         self.edit_list.append(edit)
 
@@ -145,7 +143,7 @@ class Patch:
                 if not atomic_class_name or atomic_class_name == atomic.__class__.__name__:
                     atomics.append(atomic)
         return atomics
-    
+
     def apply(self):
         """
         This method applies the patch to the target program.
@@ -159,7 +157,6 @@ class Patch:
             - key: The target file name(path) related to the program root path
             - value: The contents of the file
         """
-        assert isinstance(self.program.granularity_level, GranularityLevel)
         target_files = self.program.contents.keys()
         modification_points = deepcopy(self.program.modification_points)
         new_contents = deepcopy(self.program.contents)
@@ -170,5 +167,5 @@ class Patch:
         #self.program.reset_tmp_dir()
         for target_file in new_contents:
             with open(os.path.join(self.program.tmp_path, target_file), 'w') as tmp_file:
-                tmp_file.write(Program.to_source(self.program.granularity_level, new_contents[target_file]))
+                tmp_file.write(self.program.to_source(new_contents[target_file]))
         return new_contents

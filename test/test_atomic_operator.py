@@ -1,6 +1,6 @@
 import pytest
-from pyggi import Program, GranularityLevel
-from pyggi.atomic_operator import LineReplacement, LineInsertion
+from pyggi.line import Program as LineProgram
+from pyggi.line import LineReplacement, LineInsertion
 
 
 @pytest.fixture(scope='session')
@@ -32,8 +32,7 @@ class TestAtomicOperator(object):
             assert line_replacement.ingredient == ingredient
 
         def test_create(self):
-            program = Program('./resource/Triangle_bug',
-                              GranularityLevel.LINE)
+            program = LineProgram('./resource/Triangle_bug')
             random_line_deletion_0 = LineReplacement.create(
                 program,
                 line_file='Triangle.java',
@@ -59,8 +58,7 @@ class TestAtomicOperator(object):
             assert line_insertion.ingredient == ingredient
 
         def test_create(self):
-            program = Program('./resource/Triangle_bug',
-                              GranularityLevel.LINE)
+            program = LineProgram('./resource/Triangle_bug')
             random_line_insertion = LineInsertion.create(
                 program, line_file='Triangle.java', ingr_file='Triangle.java')
 

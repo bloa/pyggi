@@ -6,10 +6,10 @@ Automated program repair ::
 import sys
 import random
 import argparse
-from pyggi import Program, Patch, GranularityLevel, TestResult
+from pyggi import TestResult
 from pyggi.algorithms import LocalSearch
-from pyggi.atomic_operator import LineReplacement, LineInsertion
-from pyggi.custom_operator import LineDeletion
+from pyggi.line import Program
+from pyggi.line import LineReplacement, LineInsertion, LineDeletion
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='PYGGI Bug Repair Example')
@@ -19,8 +19,8 @@ if __name__ == "__main__":
     parser.add_argument('--iter', type=int, default=10000,
         help='total iterations per epoch(default: 10000)')
     args = parser.parse_args()
-    
-    program = Program(args.project_path, GranularityLevel.LINE)
+
+    program = Program(args.project_path)
     program.set_modification_weights('triangle.py', [1]*35)
     class MyTabuSearch(LocalSearch):
         def get_neighbour(self, patch):

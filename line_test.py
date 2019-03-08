@@ -1,6 +1,6 @@
-from pyggi import Program, Patch, GranularityLevel, TestResult
-from pyggi.atomic_operator import LineReplacement, LineInsertion
-from pyggi.custom_operator import LineDeletion, LineMoving
+from pyggi import Patch, TestResult
+from pyggi.line import Program
+from pyggi.line import LineReplacement, LineInsertion, LineDeletion, LineMoving
 import copy, random
 
 def result_parser(stdout, stderr):
@@ -14,8 +14,7 @@ def result_parser(stdout, stderr):
     else:
         return TestResult(False, None)
 
-triangle = Program(
-    "sample/Triangle_bug_python", granularity_level=GranularityLevel.LINE)
+triangle = Program("sample/Triangle_bug_python")
 # triangle.print_modification_points('triangle.py')
 
 # See sample/Triangle_bug_python/get_spectrum.py

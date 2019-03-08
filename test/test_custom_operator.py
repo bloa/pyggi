@@ -1,7 +1,6 @@
 import pytest
-from pyggi import Program, GranularityLevel
-from pyggi.custom_operator import LineDeletion, LineMoving
-from pyggi.atomic_operator import LineReplacement, LineInsertion
+from pyggi.line import Program as LineProgram
+from pyggi.line import LineReplacement, LineInsertion, LineDeletion, LineMoving
 
 
 @pytest.fixture(scope='session')
@@ -41,8 +40,7 @@ class TestCustomOperator(object):
                                     None)] == line_deletion.atomic_operators
 
         def test_create(self):
-            program = Program('./resource/Triangle_bug',
-                              GranularityLevel.LINE)
+            program = LineProgram('./resource/Triangle_bug')
             random_line_deletion = LineDeletion.create(program)
 
             assert random_line_deletion.x is not None
@@ -73,8 +71,7 @@ class TestCustomOperator(object):
             ] == line_moving.atomic_operators
 
         def test_create(self):
-            program = Program('./resource/Triangle_bug',
-                              GranularityLevel.LINE)
+            program = LineProgram('./resource/Triangle_bug')
             random_line_moving = LineMoving.create(program)
 
             assert random_line_moving.x is not None

@@ -1,14 +1,10 @@
-"""
-
-This module contains meta-heuristic search algorithms.
-
-"""
 import time
-from abc import ABCMeta, abstractmethod
-from .patch import Patch
-from .test_result import TestResult
+from abc import abstractmethod
+from ..abstract import AbstractAlgorithm
+from .. import Patch
+from .. import TestResult
 
-class LocalSearch(metaclass=ABCMeta):
+class LocalSearch(AbstractAlgorithm):
     """
     Local Search (Abstact Class)
 
@@ -34,7 +30,7 @@ class LocalSearch(metaclass=ABCMeta):
                         patch.remove(random.randrange(0, len(patch)))
                     else:
                         edit_operator = random.choice([LineDeletion, LineInsertion, LineReplacement])
-                        patch.add(edit_operator.random(program))
+                        patch.add(edit_operator.create(program))
                     return patch
 
                 def get_fitness(self, patch):
@@ -50,11 +46,7 @@ class LocalSearch(metaclass=ABCMeta):
             results = local_search.run(warmup_reps=5, epoch=3, max_iter=100, timeout=15)
     """
     def __init__(self, program):
-        """
-        :param program: The Program instance to optimize.
-        :type program: :py:class:`.Program`
-        """
-        self.program = program
+        super().__init__(program)
         self.best_fitness = None
 
     def is_valid_patch(self, patch):
@@ -101,20 +93,6 @@ class LocalSearch(metaclass=ABCMeta):
                 return patch.add(LineDeletion.random(program))
         """
         pass
-
-    @abstractmethod
-    def get_fitness(self, patch):
-        """
-        Define the fitness value of the patch
-
-        If you want to use original one(elapsed_time),
-        simply call ``super()``.
-
-        :param patch: The patch instacne
-        :type patch: :py:class:`.Patch`
-        :return: The fitness value
-        """
-        return patch.test_result.elapsed_time
 
     def run(self, warmup_reps=1, epoch=5, max_iter=100, timeout=15,
             result_parser=TestResult.pyggi_result_parser):

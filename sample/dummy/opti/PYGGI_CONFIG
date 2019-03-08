@@ -1,0 +1,7 @@
+{
+  "target_files": [
+    "dummy1",
+    "dummy2"
+  ],
+  "test_command": "ruby run.rb"
+}

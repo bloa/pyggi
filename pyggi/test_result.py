@@ -67,7 +67,7 @@ class TestResult:
             , returns ``TestResult(True, {'runtime': 7, 'pass_all': 'true'})``
         """
         import re
-        matched = re.findall("\[PYGGI_RESULT\]\s*\{(.*?)\}\s", stdout)
+        matched = re.findall(r"\[PYGGI_RESULT\]\s*\{(.*?)\}\s", stdout)
         compiled = len(matched) != 0
         custom = None
         if compiled:

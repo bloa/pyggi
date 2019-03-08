@@ -1,11 +1,12 @@
 import pytest
-from pyggi import Program, Patch, GranularityLevel
-from pyggi.custom_operator import LineDeletion, LineMoving
+from pyggi.line import Program as LineProgram
+from pyggi.line import LineDeletion, LineMoving
+from pyggi import Patch
 
 
 @pytest.fixture(scope='session')
 def setup():
-    program = Program('./resource/Triangle_bug', GranularityLevel.LINE)
+    program = LineProgram('./resource/Triangle_bug')
     assert len(program.target_files) == 1
     assert program.target_files[0] == 'Triangle.java'
 
@@ -34,7 +35,7 @@ class TestPatch(object):
 
     def test_eq(self, setup):
         patch, program = setup
-        program2 = Program('./resource/Triangle_bug', GranularityLevel.LINE)
+        program2 = LineProgram('./resource/Triangle_bug')
         patch2 = Patch(program2)
 
         assert patch == patch2
