@@ -1,6 +1,6 @@
 import pytest
-from pyggi.line import Program as LineProgram
-from pyggi.line import LineReplacement, LineInsertion
+from pyggi.patch.line import Program as LineProgram
+from pyggi.patch.line import LineReplacement, LineInsertion
 
 
 @pytest.fixture(scope='session')

@@ -1,37 +1,39 @@
-"""
-
-This module contains meta-heuristic search algorithms.
-
-"""
-
 from abc import ABC, abstractmethod
 
 class AbstractAlgorithm(ABC):
-    """
-    Algorithm (Abstract Class)
+    def __init__(self, software):
+        self.software = software
+        self.config = dict()
+        self.best = None
+        self.fails = set()
+        self.runs = dict()
+        self.tests = dict()
+        self.stats = {'tests': 0, 'runs': 0}
 
-    All children classes need to override
+    def setup(self):
+        pass
 
-    * :py:meth:`get_fitness`
-    """
+    def fitness(self, sol):
+        if sol in self.runs:
+            return self.runs[sol]
+        return None
 
-    def __init__(self, program):
-        """
-        :param program: The Program instance to optimize.
-        :type program: :py:class:`.Program`
-        """
-        self.program = program
+    def dominates(self, before, after):
+        return before and ((not after) or (before < after))
 
-    @abstractmethod
-    def get_fitness(self, patch):
-        """
-        Define the fitness value of the patch
+    def fit_dominates(self, sol_before, sol_after):
+        return self.dominates(self.fitness(sol_before), self.fitness(sol_after))
 
-        If you want to use original one(elapsed_time),
-        simply call ``super()``.
-
-        :param patch: The patch instacne
-        :type patch: :py:class:`.Patch`
-        :return: The fitness value
-        """
-        return patch.test_result.elapsed_time
+    def do_run(self, sol, detail=1):
+        if sol in self.runs or sol in self.fails:
+            return
+        self.stats['tests'] += 1
+        if not self.software.test(sol):
+            self.fails.add(sol)
+            return
+        tmp = self.software.run(sol)
+        if tmp:
+            self.runs[sol] = tmp
+        else:
+            self.fails.add(sol)
+        self.stats['runs'] += 1

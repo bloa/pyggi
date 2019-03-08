@@ -4,7 +4,7 @@ This module contains Patch class.
 import os
 from copy import deepcopy
 from .abstract import AbstractAtomicOperator, AbstractCustomOperator
-from .test_result import TestResult
+from ..test_result import TestResult
 
 
 class Patch:
@@ -31,6 +31,9 @@ class Patch:
 
     def __eq__(self, other):
         return self.edit_list == other.edit_list
+
+    def __hash__(self):
+        return hash(str(self))
 
     def clone(self):
         """

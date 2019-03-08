@@ -6,8 +6,8 @@ Improving non-functional properties ::
 import sys
 import random
 import argparse
-from pyggi import Patch
-from pyggi.algorithms import LocalSearch
+from pyggi.patch import Patch
+from pyggi.algorithms import LegacySearch as LocalSearch
 
 
 class MyLocalSearch(LocalSearch):
@@ -45,18 +45,18 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.ast:
-        from pyggi.astor import Program
-        from pyggi.astor import StmtReplacement, StmtInsertion, StmtDeletion
+        from pyggi.patch.astor import Program
+        from pyggi.patch.astor import StmtReplacement, StmtInsertion, StmtDeletion
         ops = [StmtDeletion, StmtInsertion, StmtReplacement]
     elif args.xml:
-        from pyggi.xml import Program
-        from pyggi.xml import TagReplacement, TagDeletion, TagInsertion, TagMoving, TagSwap
-        from pyggi.xml import XmlReplacement, XmlDeletion, XmlInsertion, XmlMoving, XmlSwap
+        from pyggi.patch.xml import Program
+        from pyggi.patch.xml import TagReplacement, TagDeletion, TagInsertion, TagMoving, TagSwap
+        from pyggi.patch.xml import XmlReplacement, XmlDeletion, XmlInsertion, XmlMoving, XmlSwap
         ops = [TagReplacement, TagDeletion, TagInsertion, TagMoving, TagSwap,
                XmlReplacement, XmlDeletion, XmlInsertion, XmlMoving, XmlSwap]
     else:
-        from pyggi.line import Program
-        from pyggi.line import LineReplacement, LineInsertion, LineDeletion
+        from pyggi.patch.line import Program
+        from pyggi.patch.line import LineReplacement, LineInsertion, LineDeletion
         ops = [LineDeletion, LineInsertion, LineReplacement]
 
     program = Program(args.project_path)

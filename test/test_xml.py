@@ -1,9 +1,9 @@
 import pytest
 import os
 from copy import deepcopy
-from pyggi.xml import Program as XmlProgram
-from pyggi.xml import TagReplacement, TagDeletion, TagInsertion, TagMoving, TagSwap
-from pyggi.xml import XmlReplacement, XmlDeletion, XmlInsertion, XmlMoving, XmlSwap
+from pyggi.patch.xml import Program as XmlProgram
+from pyggi.patch.xml import TagReplacement, TagDeletion, TagInsertion, TagMoving, TagSwap
+from pyggi.patch.xml import XmlReplacement, XmlDeletion, XmlInsertion, XmlMoving, XmlSwap
 
 
 @pytest.fixture(scope='session')

@@ -1,10 +1,11 @@
 import time
 from abc import abstractmethod
 from ..abstract import AbstractAlgorithm
-from .. import Patch
+#from ..abstract import Software
 from .. import TestResult
+from ..patch import Patch
 
-class LocalSearch(AbstractAlgorithm):
+class LocalSearch:
     """
     Local Search (Abstact Class)
 
@@ -46,7 +47,7 @@ class LocalSearch(AbstractAlgorithm):
             results = local_search.run(warmup_reps=5, epoch=3, max_iter=100, timeout=15)
     """
     def __init__(self, program):
-        super().__init__(program)
+        self.program = program
         self.best_fitness = None
 
     def is_valid_patch(self, patch):
@@ -93,6 +94,9 @@ class LocalSearch(AbstractAlgorithm):
                 return patch.add(LineDeletion.random(program))
         """
         pass
+
+    def get_fitness(self, patch):
+        return patch.test_result.elapsed_time
 
     def run(self, warmup_reps=1, epoch=5, max_iter=100, timeout=15,
             result_parser=TestResult.pyggi_result_parser):
@@ -142,7 +146,9 @@ class LocalSearch(AbstractAlgorithm):
 
             start = time.time()
             for cur_iter in range(1, max_iter + 1):
+                print(best_patch)
                 patch = self.get_neighbour(best_patch.clone())
+                print(patch)
                 patch.run_test(timeout=timeout, result_parser=result_parser)
                 result[cur_epoch]['FitnessEval'] += 1
                 if not patch.test_result.compiled:

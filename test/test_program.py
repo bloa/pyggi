@@ -1,7 +1,7 @@
 import pytest
 import os
-from pyggi.abstract import AbstractProgram
-from pyggi.line import Program as LineProgram
+from pyggi.patch.abstract import AbstractProgram
+from pyggi.patch.line import Program as LineProgram
 
 
 @pytest.fixture(scope='session')
