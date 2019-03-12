@@ -29,7 +29,7 @@ class LocalSearch(metaclass=ABCMeta):
 
             class MyLocalSearch(LocalSearch):
                 def get_neighbour(self, patch):
-                    import random
+                    from pyggi.helper import random
                     if len(patch) > 0 and random.random() < 0.5:
                         patch.remove(random.randrange(0, len(patch)))
                     else:

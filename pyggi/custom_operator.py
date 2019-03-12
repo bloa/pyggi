@@ -135,7 +135,7 @@ class LineDeletion(CustomOperator):
         :return: The LineDeletion instance with the randomly-selected line index.
         :rtype: :py:class:`.custom_operator.LineDeletion`
         """
-        import random
+        from .helper import random
         line_file = line_file or random.choice(program.target_files)
         line = (
             line_file,
@@ -215,7 +215,7 @@ class LineMoving(CustomOperator):
         :return: The LineMoving instance with the randomly-selected line & ingr.
         :rtype: :py:class:`.custom_operator.LineMoving`
         """
-        import random
+        from .helper import random
         line_file = line_file or random.choice(program.target_files)
         ingr_file = ingr_file or random.choice(program.target_files)
         line = (
@@ -279,7 +279,7 @@ class StmtDeletion(CustomOperator):
         :return: The StmtDeletion instance with the randomly-selected modification point.
         :rtype: :py:class:`.custom_operator.StmtDeletion`
         """
-        import random
+        from .helper import random
         stmt_file = stmt_file or random.choice(program.target_files)
         stmt = (
             stmt_file,
@@ -360,7 +360,7 @@ class StmtMoving(CustomOperator):
         :return: The StmtMoving instance with the randomly-selected stmt & ingr.
         :rtype: :py:class:`.custom_operator.StmtMoving`
         """
-        import random
+        from .helper import random
         stmt_file = stmt_file or random.choice(program.target_files)
         ingr_file = ingr_file or random.choice(program.target_files)
         stmt = (

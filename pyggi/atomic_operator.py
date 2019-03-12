@@ -190,7 +190,7 @@ class LineReplacement(AtomicOperator):
           line and ingredient.
         :rtype: :py:class:`.atomic_operator.LineReplacement`
         """
-        import random
+        from .helper import random
         assert del_rate >= 0 and del_rate <= 1
         line_file = line_file or random.choice(program.target_files)
         line = (line_file, program.select_modification_point(line_file, method))
@@ -298,7 +298,7 @@ class LineInsertion(AtomicOperator):
           line and ingredient.
         :rtype: :py:class:`.atomic_operator.LineInsertion`
         """
-        import random
+        from .helper import random
         line_file = line_file or random.choice(program.target_files)
         ingr_file = ingr_file or random.choice(program.target_files)
         line = (
@@ -389,7 +389,7 @@ class StmtReplacement(AtomicOperator):
           stmt and ingredient.
         :rtype: :py:class:`.atomic_operator.StmtReplacement`
         """
-        import random
+        from .helper import random
         assert del_rate >= 0 and del_rate <= 1
         stmt_file = stmt_file or random.choice(program.target_files)
         stmt = (stmt_file, program.select_modification_point(stmt_file, method))
@@ -499,7 +499,7 @@ class StmtInsertion(AtomicOperator):
           stmt and ingredient.
         :rtype: :py:class:`.atomic_operator.StmtInsertion`
         """
-        import random
+        from .helper import random
         stmt_file = stmt_file or random.choice(program.target_files)
         ingr_file = ingr_file or random.choice(program.target_files)
         stmt = (

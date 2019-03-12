@@ -125,7 +125,7 @@ class Program(object):
         :return: The **index** of modification point
         :rtype: int
         """
-        import random
+        from .helper import random
         assert target_file in self.target_files
         assert method in ['random', 'weighted']
         candidates = self.modification_points[target_file]
