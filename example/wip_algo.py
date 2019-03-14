@@ -1,36 +1,24 @@
+from pyggi.abstract import AbstractSoftware, AbstractEdit, Patch
 from pyggi.algorithms import IteratedLocalSearch, GeneticProgramming, TabuSearch
-# from pyggi.gi.xml import Program
-from pyggi.patch.abstract import AbstractSoftware
-from pyggi.patch.abstract import AbstractAtomicOperator
-from pyggi.patch import Patch
-from random import random
+from random import random, seed
 from copy import deepcopy
 
-class FakeEdit(AbstractAtomicOperator):
+class FakeEdit(AbstractEdit):
     def __init__(self):
         self.fake = int(random()*100)
-        pass
+    def __eq__(self, other):
+        self.fake == other.fake
     def __str__(self):
         return 'FE({})'.format(self.fake)
-    def apply(self):
-        pass
-    def create(self):
-        pass
-    def is_valid_for(self, _):
-        return True
-    def modification_point(self):
+    def alter(self, software):
         pass
 
 class MySoftware(AbstractSoftware):
-    def initial(self):
-        return Patch(self)
+    def test(self):
+        return random() < 1/(1+len(self.patch))
 
-    def test(self, patch):
-        return random() < 1/(1+len(patch))
-
-    def run(self, patch):
+    def run(self):
         return int(10000000*random())
-
 
 class MyAlgo(IteratedLocalSearch):
     def stopping_condition(self):
@@ -43,9 +31,9 @@ class MyAlgo(IteratedLocalSearch):
 
     def mutate(self, sol):
         if len(sol) > 1 and random() > 0.5:
-            sol.edit_list.pop(int(random()*len(sol)))
+            sol.edits.pop(int(random()*len(sol)))
         else:
-            sol.edit_list.append(FakeEdit())
+            sol.edits.append(FakeEdit())
         return sol
 
 class MyAlgo2(GeneticProgramming):
@@ -59,15 +47,15 @@ class MyAlgo2(GeneticProgramming):
 
     def mutate(self, sol):
         if len(sol) > 1 and random() > 0.5:
-            sol.remove(int(random()*len(sol)))
+            sol.edits.pop(int(random()*len(sol)))
         else:
-            sol.add(FakeEdit())
+            sol.edits.append(FakeEdit())
         return sol
 
     def crossover(self, sol1, sol2):
         c = deepcopy(sol1)
-        for edit in sol2.edit_list:
-            c.add(edit)
+        for edit in sol2.edits:
+            c.edits.append(edit)
         return c
 
 class MyAlgo3(TabuSearch):
@@ -89,20 +77,30 @@ class MyAlgo3(TabuSearch):
 
     def mutate(self, sol):
         if len(sol) > 1 and random() > 0.5:
-            sol.remove(int(random()*len(sol)))
+            sol.edits.pop(int(random()*len(sol)))
         else:
-            sol.add(FakeEdit())
+            sol.edits.append(FakeEdit())
         return sol
 
 
-software = MySoftware()
-algo = MyAlgo3(software)
+if __name__ == "__main__":
+    software = MySoftware()
+    algos = [
+        MyAlgo(software),
+        MyAlgo2(software),
+        MyAlgo3(software),
+    ]
 
-try:
-    algo.run(software.initial())
-finally:
-    print()
-    print('===== Final =====')
-    print(algo.stats)
-    print('best fitness:', algo.fitness(algo.best))
-    print(algo.best)
+    for algo in algos:
+        print('===== Start =====')
+        seed(0)
+        try:
+            patch = Patch()
+            algo.run(patch)
+        finally:
+            print()
+            print('===== Finish =====')
+            print(algo.stats)
+            print('best fitness:', algo.fitness(algo.best))
+            print(algo.best)
+            print()

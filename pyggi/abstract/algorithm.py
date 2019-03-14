@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from copy import deepcopy
 
 class AbstractAlgorithm(ABC):
     def __init__(self, software):
@@ -19,6 +20,7 @@ class AbstractAlgorithm(ABC):
         return None
 
     def dominates(self, before, after):
+        # print('dominates?', before, after)
         return before and ((not after) or (before < after))
 
     def fit_dominates(self, sol_before, sol_after):
@@ -28,12 +30,14 @@ class AbstractAlgorithm(ABC):
         if sol in self.runs or sol in self.fails:
             return
         self.stats['tests'] += 1
-        if not self.software.test(sol):
+        mutant = deepcopy(self.software)
+        mutant.apply(sol)
+        if not self.software.test():
             self.fails.add(sol)
             return
-        tmp = self.software.run(sol)
-        if tmp:
-            self.runs[sol] = tmp
+        run = self.software.run()
+        if run:
+            self.runs[sol] = run
         else:
             self.fails.add(sol)
         self.stats['runs'] += 1

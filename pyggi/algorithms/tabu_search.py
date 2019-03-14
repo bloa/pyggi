@@ -44,14 +44,14 @@ class TabuSearch(AbstractAlgorithm):
                 #     print('rejected: {} > {}'.format(self.fitness(neighbour), self.fitness(local_best)))
             if local_best and self.fitness(local_best):
                 self.stats['steps'] += 1
-                print('current {}'.format(self.fitness(local_best)))
                 current = local_best
+                print('current {}'.format(self.fitness(current)))
                 tabu.append(local_best)
                 while len(tabu) >= self.config['tabu_length']:
                     tabu.popleft()
                 if self.fit_dominates(current, self.best):
-                    print('new BEST! {}'.format(self.fitness(current)))
                     self.best = deepcopy(current)
+                    print('new BEST! {}'.format(self.fitness(self.best)))
             else: # restart
                 self.stats['iteration'] += 1
                 print()

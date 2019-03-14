@@ -1,6 +1,0 @@
-{
-  "target_files": [
-    "dummy.xml"
-  ],
-  "test_command": "ruby run.rb"
-}
