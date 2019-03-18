@@ -1,5 +1,5 @@
 from pyggi.abstract import AbstractSoftware, AbstractEdit, Patch
-from pyggi.algorithms import IteratedLocalSearch, GeneticProgramming, TabuSearch
+from pyggi.algorithms import RandomSearch, IteratedLocalSearch, GeneticProgramming, TabuSearch
 from random import random, seed
 from copy import deepcopy
 
@@ -82,6 +82,17 @@ class MyAlgo3(TabuSearch):
             sol.edits.append(FakeEdit())
         return sol
 
+class MyAlgo4(RandomSearch):
+    def stopping_condition(self):
+        return self.stats['steps'] >= 30
+
+    def mutate(self, sol):
+        if len(sol) > 1 and random() > 0.5:
+            sol.edits.pop(int(random()*len(sol)))
+        else:
+            sol.edits.append(FakeEdit())
+        return sol
+
 
 if __name__ == "__main__":
     software = MySoftware()
@@ -89,6 +100,7 @@ if __name__ == "__main__":
         MyAlgo(software),
         MyAlgo2(software),
         MyAlgo3(software),
+        MyAlgo4(software),
     ]
 
     for algo in algos:
