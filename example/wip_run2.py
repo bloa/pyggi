@@ -1,23 +1,28 @@
+import time
 from pyggi.base import Patch
 from pyggi.algorithms import IteratedLocalSearch
-from pyggi.line import LineDeletion, LineReplacement, LineSwap, LineInsertionBefore, LineMoveBefore
-from pyggi.line import LineProgram
+from pyggi.tree import TreeDeletion, TreeReplacement
+from pyggi.tree import AstorProgram
 from random import random, choice
 from copy import deepcopy
 
-class MyProgram(LineProgram):
-    def parse_output(self, stdout, stderr):
-        try:
-            return int(stdout)
-        except:
-            return None
+class MyProgram(AstorProgram):
+    def setup(self):
+        super().setup()
+        self.config['timeout'] = 1
 
-EDITS = [LineDeletion, LineReplacement, LineSwap, LineInsertionBefore, LineMoveBefore]
+    def parse_output(self, stdout, stderr):
+        return stderr == ''
+
+    def run(self):
+        start = time.time()
+        if super().run():
+            return time.time() - start
+        return None
+
+EDITS = [TreeDeletion, TreeReplacement]
 
 class MyAlgo(IteratedLocalSearch):
-    def dominates(self, before, after):
-        return before and ((not after) or (before > after))
-
     def stopping_condition(self):
         return self.stats['steps'] >= 30
 
@@ -36,8 +41,8 @@ class MyAlgo(IteratedLocalSearch):
 if __name__ == "__main__":
     config = {
         'path': '.',
-        'target_files': ['foo_numbers.py'],
-        'run_cmd': 'python foo_numbers.py',
+        'target_files': ['wip_abstract.py'],
+        'run_cmd': 'python wip_abstract.py',
     }
 
     software = MyProgram(config)
@@ -53,4 +58,4 @@ if __name__ == "__main__":
     print()
     soft = deepcopy(software)
     algo.best.alter(soft)
-    print(soft)
+    soft.write('pyggi_best')

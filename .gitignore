@@ -11,6 +11,7 @@ paper/
 
 pyggi_tmp/*
 */pyggi_tmp/*
+*/pyggi_best/*
 
 # Pyenv
 .python-version

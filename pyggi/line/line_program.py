@@ -25,11 +25,6 @@ class LineProgram(LinearSoftware):
     def synthetise(self, target):
         return '{}\n'.format('\n'.join(self.contents[target]))
 
-    def write(self, path):
-        for target in self.config['target_files']:
-            with open(os.path.join(path, target), 'w') as target_file:
-                target_file.write(self.synthetise(target))
-
     def do_delete(self, target):
         target_file, target_point = target
         self.contents[target_file][self.modification_points[target_file][target_point]] = ''

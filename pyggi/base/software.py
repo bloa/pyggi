@@ -53,9 +53,11 @@ class Software(AbstractSoftware):
     def synthetise(self, target):
         pass
 
-    @abstractmethod
     def write(self, path):
-        pass
+        os.makedirs(path, exist_ok=True)
+        for target in self.config['target_files']:
+            with open(os.path.join(path, target), 'w') as target_file:
+                target_file.write(self.synthetise(target))
 
     def ready(self):
         assert(self.path != self.config['path'])
@@ -88,8 +90,7 @@ class Software(AbstractSoftware):
         return output
 
     # TODO: better use JSON or YAML
-    @staticmethod
-    def parse_output(stdout, stderr):
+    def parse_output(self, stdout, stderr):
         matched = re.findall(r"\[PYGGI_RESULT\]\s*\{(.*?)\}\s", stdout)
         if len(matched) == 0:
             return None
@@ -107,6 +108,6 @@ class Software(AbstractSoftware):
 
     def random_target(self):
         target_file = random.choice(list(self.modification_points.keys()))
-        target_point = random.choice(self.modification_points[target_file])
+        target_point = random.choice(range(len(self.modification_points[target_file])))
         return (target_file, target_point)
 
