@@ -32,10 +32,11 @@ class AbstractAlgorithm(ABC):
         self.stats['tests'] += 1
         mutant = deepcopy(self.software)
         mutant.apply(sol)
-        if not self.software.test():
+        mutant.ready()
+        if not mutant.test():
             self.fails.add(sol)
             return
-        run = self.software.run()
+        run = mutant.run()
         if run:
             self.runs[sol] = run
         else:
