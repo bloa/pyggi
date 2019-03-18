@@ -1,6 +1,6 @@
 import os
 import random
-from ..granularity import LinearSoftware
+from . import LinearSoftware
 
 class Line2Program(LinearSoftware):
     def __str__(self):

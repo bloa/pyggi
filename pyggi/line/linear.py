@@ -1,6 +1,5 @@
 from abc import abstractmethod
-from . import Software
-from ..base import AbstractEdit
+from ..base import AbstractEdit, Software
 
 class LinearSoftware(Software):
     @abstractmethod

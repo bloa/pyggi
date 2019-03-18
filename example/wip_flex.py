@@ -1,6 +1,6 @@
 from pyggi.base import Patch
-from pyggi.granularity import LineDeletion, LineReplacement, LineSwap, LineInsertionBefore, LineMoveBefore
-from pyggi.implem import LineProgram, Line2Program
+from pyggi.line import LineDeletion, LineReplacement, LineSwap, LineInsertionBefore, LineMoveBefore
+from pyggi.line import LineProgram, Line2Program
 from random import choice
 from copy import deepcopy
 import argparse
