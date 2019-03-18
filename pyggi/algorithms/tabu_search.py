@@ -10,6 +10,7 @@ class TabuSearch(AbstractAlgorithm):
         super().__init__(software)
         self.stats.update({'iteration': 0, 'steps': 0})
         self.config['tabu_length'] = 10
+        self.tabu = deque()
 
     def run(self, initial_sol):
         # start!
@@ -24,8 +25,7 @@ class TabuSearch(AbstractAlgorithm):
 
         # main loop
         current = deepcopy(self.best)
-        tabu = deque()
-        tabu.append(current)
+        self.make_tabu(current)
         self.stats['iteration'] += 1
         print()
         print('===== Iteration {} ====='.format(self.stats['iteration']))
@@ -35,7 +35,7 @@ class TabuSearch(AbstractAlgorithm):
             for neighbour in self.neighbourhood(current):
                 if self.stopping_condition():
                     break
-                if neighbour in tabu:
+                if self.is_tabu(neighbour):
                     continue
                 self.do_run(neighbour)
                 if self.fit_dominates(neighbour, local_best):
@@ -46,9 +46,7 @@ class TabuSearch(AbstractAlgorithm):
                 self.stats['steps'] += 1
                 current = local_best
                 print('current {}'.format(self.fitness(current)))
-                tabu.append(local_best)
-                while len(tabu) >= self.config['tabu_length']:
-                    tabu.popleft()
+                self.make_tabu(current)
                 if self.fit_dominates(current, self.best):
                     self.best = deepcopy(current)
                     print('new BEST! {}'.format(self.fitness(self.best)))
@@ -59,8 +57,8 @@ class TabuSearch(AbstractAlgorithm):
                 print('*** restart ***')
                 self.stats['steps'] += 1
                 current = deepcopy(initial_sol)
-                tabu.clear()
-                tabu.append(current)
+                self.clear_tabu()
+                self.make_tabu(current)
                 print('best: {}'.format(self.fitness(self.best)))
                 print('current: {}'.format(self.fitness(current)))
 
@@ -71,6 +69,17 @@ class TabuSearch(AbstractAlgorithm):
     @abstractmethod
     def neighbourhood(self, sol):
         pass
+
+    def is_tabu(self, sol):
+        return sol in self.tabu
+
+    def make_tabu(self, sol):
+        self.tabu.append(sol)
+        while len(self.tabu) >= self.config['tabu_length']:
+            self.tabu.popleft()
+
+    def clear_tabu(self, sol):
+        self.tabu.clear()
 
     def stopping_condition(self):
         now = time()
