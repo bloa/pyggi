@@ -1,11 +1,11 @@
+import copy
+import random
 from pyggi.base import AbstractSoftware, AbstractEdit, Patch
 from pyggi.algorithms import IteratedLocalSearch, GeneticProgramming, TabuSearch
-from random import random
-from copy import deepcopy
 
 class FakeEdit(AbstractEdit):
     def __init__(self):
-        self.fake = int(random()*100)
+        self.fake = int(random.random()*100)
     def __eq__(self, other):
         self.fake == other.fake
     def __str__(self):
@@ -15,10 +15,10 @@ class FakeEdit(AbstractEdit):
 
 class MySoftware(AbstractSoftware):
     def test(self):
-        return random() < 1/(1+len(self.patch))
+        return random.random() < 1/(1+len(self.patch))
 
     def run(self):
-        return int(10000000*random())
+        return int(10000000*random.random())
 
 class MyAlgo(IteratedLocalSearch):
     def stopping_condition(self):
@@ -26,12 +26,12 @@ class MyAlgo(IteratedLocalSearch):
 
     def neighbourhood(self, sol):
         for _ in range(100): # neighbourhood size
-            c = deepcopy(sol)
+            c = copy.deepcopy(sol)
             yield self.mutate(c)
 
     def mutate(self, sol):
-        if len(sol) > 1 and random() > 0.5:
-            sol.edits.pop(int(random()*len(sol)))
+        if len(sol) > 1 and random.random() > 0.5:
+            sol.edits.pop(int(random.random()*len(sol)))
         else:
             sol.edits.append(FakeEdit())
         return sol

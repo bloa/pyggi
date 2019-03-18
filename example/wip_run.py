@@ -1,9 +1,9 @@
+import copy
+import random
 from pyggi.base import Patch
 from pyggi.algorithms import IteratedLocalSearch
 from pyggi.line import LineDeletion, LineReplacement, LineSwap, LineInsertionBefore, LineMoveBefore
 from pyggi.line import LineProgram
-from random import random, choice
-from copy import deepcopy
 
 class MyProgram(LineProgram):
     def parse_output(self, stdout, stderr):
@@ -23,14 +23,14 @@ class MyAlgo(IteratedLocalSearch):
 
     def neighbourhood(self, sol):
         for _ in range(100): # neighbourhood size
-            c = deepcopy(sol)
+            c = copy.deepcopy(sol)
             yield self.mutate(c)
 
     def mutate(self, sol):
-        if len(sol) > 1 and random() > 0.5:
-            sol.edits.pop(int(random()*len(sol)))
+        if len(sol) > 1 and random.random() > 0.5:
+            sol.edits.pop(int(random.random()*len(sol)))
         else:
-            sol.edits.append(choice(EDITS).create(self.software))
+            sol.edits.append(random.choice(EDITS).create(self.software))
         return sol
 
 if __name__ == "__main__":
@@ -51,6 +51,6 @@ if __name__ == "__main__":
     print('best fitness:', algo.fitness(algo.best))
     print(algo.best)
     print()
-    soft = deepcopy(software)
+    soft = copy.deepcopy(software)
     algo.best.alter(soft)
     print(soft)

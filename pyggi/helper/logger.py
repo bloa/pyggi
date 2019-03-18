@@ -4,6 +4,8 @@ This module contains Logger class.
 
 """
 import logging
+import os
+import time
 
 class Logger(object):
     """
@@ -16,8 +18,6 @@ class Logger(object):
     LOG_DIR = './pyggi_log'
 
     def __init__(self, name):
-        import time
-        import os
         # initialize
         self._logger = logging.getLogger(name)
         self._logger.setLevel(logging.DEBUG)

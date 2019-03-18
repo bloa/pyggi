@@ -1,5 +1,5 @@
 import ast
-from copy import deepcopy
+import copy
 
 def is_pos_type(pos):
     """
@@ -85,7 +85,7 @@ def replace(dst, src):
     dst_block, dst_index = pos_2_block_n_index(*dst)
     if src:
         src_block, src_index = pos_2_block_n_index(*src)
-        dst_block[dst_index] = deepcopy(src_block[src_index])
+        dst_block[dst_index] = copy.deepcopy(src_block[src_index])
     else:
         dst_block[dst_index] = ast.Pass()
     return True
@@ -105,7 +105,7 @@ def swap(a, b):
         return False
     a_block, a_index = pos_2_block_n_index(*a)
     b_block, b_index = pos_2_block_n_index(*b)
-    a_block[a_index], b_block[b_index] = deepcopy(b_block[b_index]), deepcopy(
+    a_block[a_index], b_block[b_index] = copy.deepcopy(b_block[b_index]), copy.deepcopy(
         a_block[a_index])
     return True
 
@@ -124,7 +124,7 @@ def insert_before(dst, src):
         return False
     dst_block, dst_index = pos_2_block_n_index(*dst)
     src_block, src_index = pos_2_block_n_index(*src)
-    dst_block.insert(dst_index, deepcopy(src_block[src_index]))
+    dst_block.insert(dst_index, copy.deepcopy(src_block[src_index]))
     return True
 
 
@@ -142,5 +142,5 @@ def insert_after(dst, src):
         return False
     dst_block, dst_index = pos_2_block_n_index(*dst)
     src_block, src_index = pos_2_block_n_index(*src)
-    dst_block.insert(dst_index + 1, deepcopy(src_block[src_index]))
+    dst_block.insert(dst_index + 1, copy.deepcopy(src_block[src_index]))
     return True

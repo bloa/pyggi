@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from copy import deepcopy
+import copy
 
 class AbstractAlgorithm(ABC):
     def __init__(self, software):
@@ -30,7 +30,7 @@ class AbstractAlgorithm(ABC):
         if sol in self.runs or sol in self.fails:
             return
         self.stats['tests'] += 1
-        mutant = deepcopy(self.software)
+        mutant = copy.deepcopy(self.software)
         mutant.apply(sol)
         mutant.ready()
         if not mutant.test():
