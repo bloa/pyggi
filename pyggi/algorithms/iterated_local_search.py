@@ -46,18 +46,18 @@ class IteratedLocalSearch(AbstractAlgorithm):
             tabu = set()
             tabu.add(current)
             self.stats['cons_worse'] = 0
-            while not self.stuck_condition():
+            while not self.stuck_condition() and not self.stopping_condition():
                 # neighbourhood search
                 self.stats['cons_tabu'] = 0
                 for neighbour in self.neighbourhood(current):
-                    self.stats['steps'] += 1
-                    if self.break_condition() or self.stuck_condition():
+                    if self.break_condition() or self.stuck_condition() or self.stopping_condition():
                         break
                     if neighbour in tabu:
                         self.stats['cons_tabu'] += 1
                         continue
                     self.stats['cons_tabu'] = 0
                     tabu.add(neighbour)
+                    self.stats['steps'] += 1
                     self.do_run(neighbour)
                     if self.accept(current, neighbour):
                         print('current {}'.format(self.fitness(neighbour)))
