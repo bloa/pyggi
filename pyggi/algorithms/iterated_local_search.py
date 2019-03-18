@@ -7,7 +7,7 @@ from ..abstract import AbstractAlgorithm
 class IteratedLocalSearch(AbstractAlgorithm):
     def __init__(self, software):
         super().__init__(software)
-        self.stats.update({'iteration': 0, 'cons_worse': 0, 'cons_tabu': 0})
+        self.stats.update({'iteration': 0, 'steps': 0, 'cons_worse': 0, 'cons_tabu': 0})
         self.config['perturb_length'] = 3
 
     def run(self, initial_sol):
@@ -50,6 +50,7 @@ class IteratedLocalSearch(AbstractAlgorithm):
                 # neighbourhood search
                 self.stats['cons_tabu'] = 0
                 for neighbour in self.neighbourhood(current):
+                    self.stats['steps'] += 1
                     if self.break_condition() or self.stuck_condition():
                         break
                     if neighbour in tabu:
