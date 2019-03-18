@@ -2,7 +2,7 @@ from abc import abstractmethod
 from copy import deepcopy
 from random import random
 from time import time
-from ..abstract import AbstractAlgorithm
+from ..base import AbstractAlgorithm
 
 class IteratedLocalSearch(AbstractAlgorithm):
     def __init__(self, software):

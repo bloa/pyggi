@@ -1,4 +1,4 @@
-from pyggi.abstract import Patch
+from pyggi.base import Patch
 from pyggi.granularity import LineDeletion, LineReplacement, LineSwap, LineInsertionBefore, LineMoveBefore
 from pyggi.algorithms import IteratedLocalSearch
 from pyggi.implem import LineProgram

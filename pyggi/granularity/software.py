@@ -6,7 +6,7 @@ import shutil
 import subprocess
 import time
 from abc import abstractmethod
-from ..abstract import AbstractSoftware
+from ..base import AbstractSoftware
 
 class Software(AbstractSoftware):
     def setup(self):

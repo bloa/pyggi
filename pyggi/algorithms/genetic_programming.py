@@ -2,7 +2,7 @@ from abc import abstractmethod
 from copy import deepcopy
 from random import random, sample, shuffle
 from time import time
-from ..abstract import AbstractAlgorithm
+from ..base import AbstractAlgorithm
 
 class GeneticProgramming(AbstractAlgorithm):
     def __init__(self, software):

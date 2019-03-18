@@ -1,4 +1,4 @@
-from pyggi.abstract import AbstractSoftware, AbstractEdit, Patch
+from pyggi.base import AbstractSoftware, AbstractEdit, Patch
 from pyggi.algorithms import RandomSearch, IteratedLocalSearch, GeneticProgramming, TabuSearch
 from random import random, seed
 from copy import deepcopy

@@ -3,7 +3,7 @@ from copy import deepcopy
 from random import random
 from time import time
 from collections import deque
-from ..abstract import AbstractAlgorithm
+from ..base import AbstractAlgorithm
 
 class RandomSearch(AbstractAlgorithm):
     def __init__(self, software):
