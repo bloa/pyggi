@@ -1,8 +1,7 @@
-from pyggi.abstract import AbstractSoftware, AbstractEdit, Patch
-from pyggi.algorithms import IteratedLocalSearch, GeneticProgramming, TabuSearch
+from pyggi.abstract import Patch
 from pyggi.granularity import LineDeletion, LineReplacement, LineSwap, LineInsertionBefore, LineMoveBefore
 from pyggi.implem import LineProgram, Line2Program
-from random import random, choice
+from random import choice
 from copy import deepcopy
 import argparse
 
