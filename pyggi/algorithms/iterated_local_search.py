@@ -25,6 +25,7 @@ class IteratedLocalSearch(AbstractAlgorithm):
         current = copy.deepcopy(self.best)
         while not self.stopping_condition():
             self.stats['iteration'] += 1
+            self.stats['steps'] += 1
             print()
             print('===== Iteration {} ====='.format(self.stats['iteration']))
             # restart or perturb
@@ -33,12 +34,18 @@ class IteratedLocalSearch(AbstractAlgorithm):
                 current = copy.deepcopy(self.initial)
             elif self.perturb_condition():
                 print('*** perturb ***')
-                while True:
+                tries = 3
+                while tries > 0:
+                    tries -= 1
                     tmp = self.perturb(copy.deepcopy(current))
                     self.do_run(tmp)
                     if not tmp in self.fails:
                         current = tmp
                         break
+                else: # restart
+                    print('perturb failed')
+                    print('*** restart ***')
+                    current = copy.deepcopy(self.initial)
             print('best: {}'.format(self.fitness(self.best)))
             print('current: {}'.format(self.fitness(current)))
 
@@ -63,15 +70,16 @@ class IteratedLocalSearch(AbstractAlgorithm):
                         print('current {}'.format(self.fitness(neighbour)))
                         current = neighbour
                         self.stats['cons_worse'] = 0
+                        if self.fit_dominates(current, self.best):
+                            print('new BEST! {}'.format(self.fitness(current)))
+                            self.best = copy.deepcopy(current)
+
                         break
                     else:
                         self.stats['cons_worse'] += 1
                         # print('rejected: {} > {}'.format(self.fitness(neighbour), self.fitness(current)))
                 if self.break_condition() or self.stats['cons_worse'] > 0:
                     break
-            if self.accept(self.best, current):
-                print('new BEST! {}'.format(self.fitness(current)))
-                self.best = copy.deepcopy(current)
 
         # the end
         self.stats['wallclock_end'] = time.time()

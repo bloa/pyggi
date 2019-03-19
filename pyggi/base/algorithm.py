@@ -23,7 +23,7 @@ class AbstractAlgorithm(ABC):
 
     def dominates(self, before, after):
         # print('dominates?', before, after)
-        return before and ((not after) or (before < after))
+        return (before is not None) and ((after is None) or (before < after))
 
     def fit_dominates(self, sol_before, sol_after):
         return self.dominates(self.fitness(sol_before), self.fitness(sol_after))

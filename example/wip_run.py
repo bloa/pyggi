@@ -15,7 +15,7 @@ EDITS = [LineDeletion, LineReplacement, LineSwap, LineInsertionBefore, LineMoveB
 
 class MyAlgo(IteratedLocalSearch):
     def dominates(self, before, after):
-        return before and ((not after) or (before > after))
+        return (before is not None) and ((after is None) or (before > after))
 
     def stopping_condition(self):
         return self.stats['steps'] >= 30
