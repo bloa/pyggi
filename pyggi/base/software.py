@@ -102,10 +102,6 @@ class Software(AbstractSoftware):
             custom[key] = value
         return custom
 
-    @staticmethod
-    def hook_parse_output(output):
-        return output
-
     def random_target(self):
         target_file = random.choice(list(self.modification_points.keys()))
         target_point = random.choice(range(len(self.modification_points[target_file])))
