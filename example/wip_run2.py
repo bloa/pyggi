@@ -46,10 +46,8 @@ if __name__ == "__main__":
     }
 
     software = MyProgram(config)
-    patch = Patch()
-
     algo = MyAlgo(software)
-    algo.run(patch)
+    algo.run()
 
     print()
     print('===== Finish =====')

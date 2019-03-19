@@ -1,7 +1,7 @@
 from abc import abstractmethod
-from copy import deepcopy
-from random import random
-from time import time
+import copy
+import random
+import time
 from ..base import AbstractAlgorithm
 
 class IteratedLocalSearch(AbstractAlgorithm):
@@ -10,19 +10,19 @@ class IteratedLocalSearch(AbstractAlgorithm):
         self.stats.update({'iteration': 0, 'steps': 0, 'cons_worse': 0, 'cons_tabu': 0})
         self.config['perturb_length'] = 3
 
-    def run(self, initial_sol):
+    def run(self):
         # start!
-        self.stats['wallclock_start'] = time()
-        self.do_run(initial_sol)
-        if not initial_sol in self.fails:
-            self.best = initial_sol
+        self.stats['wallclock_start'] = time.time()
+        self.do_run(self.initial)
+        if not self.initial in self.fails:
+            self.best = copy.deepcopy(self.initial)
             print('initial: {}'.format(self.fitness(self.best)))
         else:
             print('initial solution has failed')
             return
 
         # main loop
-        current = deepcopy(self.best)
+        current = copy.deepcopy(self.best)
         while not self.stopping_condition():
             self.stats['iteration'] += 1
             print()
@@ -30,11 +30,11 @@ class IteratedLocalSearch(AbstractAlgorithm):
             # restart or perturb
             if self.restart_condition():
                 print('*** restart ***')
-                current = deepcopy(initial_sol)
+                current = copy.deepcopy(self.initial)
             elif self.perturb_condition():
                 print('*** perturb ***')
                 while True:
-                    tmp = self.perturb(deepcopy(current))
+                    tmp = self.perturb(copy.deepcopy(current))
                     self.do_run(tmp)
                     if not tmp in self.fails:
                         current = tmp
@@ -71,10 +71,10 @@ class IteratedLocalSearch(AbstractAlgorithm):
                     break
             if self.accept(self.best, current):
                 print('new BEST! {}'.format(self.fitness(current)))
-                self.best = deepcopy(current)
+                self.best = copy.deepcopy(current)
 
         # the end
-        self.stats['wallclock_end'] = time()
+        self.stats['wallclock_end'] = time.time()
         print('===== END ({:.2f}s) ====='.format(self.stats['wallclock_end'] - self.stats['wallclock_start']))
 
     @abstractmethod
@@ -82,7 +82,7 @@ class IteratedLocalSearch(AbstractAlgorithm):
         pass
 
     def perturb(self, sol):
-        sol = deepcopy(sol)
+        sol = copy.deepcopy(sol)
         for _ in range(self.config['perturb_length']):
             sol = next(self.neighbourhood(sol))
         return sol
@@ -91,11 +91,11 @@ class IteratedLocalSearch(AbstractAlgorithm):
         return not self.fit_dominates(before, after)
 
     def stopping_condition(self):
-        now = time()
+        now = time.time()
         return now > self.stats['wallclock_start'] + 30 # default: 30 seconds
 
     def restart_condition(self):
-        return random() < 0.01
+        return random.random() < 0.01
 
     def perturb_condition(self):
         return self.stats['iteration'] > 1

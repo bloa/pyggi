@@ -1,7 +1,7 @@
 from abc import abstractmethod
-from copy import deepcopy
-from random import random, sample, shuffle
-from time import time
+import copy
+import random
+import time
 from ..base import AbstractAlgorithm
 
 class GeneticProgramming(AbstractAlgorithm):
@@ -10,15 +10,15 @@ class GeneticProgramming(AbstractAlgorithm):
         self.stats.update({'generation': 0})
         self.config['pop_size'] = 10
 
-    def run(self, initial_sol):
+    def run(self):
         # setup
         self.setup()
 
         # start!
-        self.stats['wallclock_start'] = time()
-        self.do_run(initial_sol)
-        if not initial_sol in self.fails:
-            self.best = initial_sol
+        self.stats['wallclock_start'] = time.time()
+        self.do_run(self.initial)
+        if not self.initial in self.fails:
+            self.best = copy.deepcopy(self.initial)
             print('initial: {}'.format(self.fitness(self.best)))
         else:
             print('initial solution has failed')
@@ -27,7 +27,7 @@ class GeneticProgramming(AbstractAlgorithm):
         # initial pop
         pop = list()
         while len(pop) < self.config['pop_size']:
-            sol = self.mutate(deepcopy(initial_sol))
+            sol = self.mutate(copy.deepcopy(self.initial))
             pop.append(sol)
 
         print()
@@ -41,7 +41,7 @@ class GeneticProgramming(AbstractAlgorithm):
                 tmp = sol
         if self.fit_dominates(tmp, self.best):
             print('new BEST! {}'.format(self.fitness(tmp)))
-            self.best = deepcopy(tmp)
+            self.best = copy.deepcopy(tmp)
 
         # main loop
         while not self.stopping_condition():
@@ -51,16 +51,16 @@ class GeneticProgramming(AbstractAlgorithm):
             offsprings = list()
             parents = self.select(pop)
             # crossover
-            for parent in deepcopy(parents):
-                sol = self.crossover(parent, sample(pop, 1)[0])
+            for parent in copy.deepcopy(parents):
+                sol = self.crossover(parent, random.sample(pop, 1)[0])
                 offsprings.append(sol)
             # mutation
-            for parent in deepcopy(parents):
+            for parent in copy.deepcopy(parents):
                 sol = self.mutate(parent)
                 offsprings.append(sol)
             # regrow
             while len(offsprings) < self.config['pop_size']:
-                sol = self.mutate(deepcopy(initial_sol))
+                sol = self.mutate(copy.deepcopy(self.initial))
                 offsprings.append(sol)
             # replace
             pop = offsprings
@@ -73,10 +73,10 @@ class GeneticProgramming(AbstractAlgorithm):
                     tmp = sol
             if self.fit_dominates(tmp, self.best):
                 print('new BEST! {}'.format(self.fitness(tmp)))
-                self.best = deepcopy(tmp)
+                self.best = copy.deepcopy(tmp)
 
         # the end
-        self.stats['wallclock_end'] = time()
+        self.stats['wallclock_end'] = time.time()
         print('===== END ({:.2f}s) ====='.format(self.stats['wallclock_end'] - self.stats['wallclock_start']))
 
     @abstractmethod
@@ -95,7 +95,7 @@ class GeneticProgramming(AbstractAlgorithm):
         False
 
     def restart_condition(self):
-        return random() < 0.01
+        return random.random() < 0.01
 
     def perturb_condition(self):
         return self.stats['generation'] > 1

@@ -1,6 +1,5 @@
 import copy
 import random
-from pyggi.base import Patch
 from pyggi.algorithms import IteratedLocalSearch
 from pyggi.line import LineDeletion, LineReplacement, LineSwap, LineInsertionBefore, LineMoveBefore
 from pyggi.line import LineProgram
@@ -41,10 +40,8 @@ if __name__ == "__main__":
     }
 
     software = MyProgram(config)
-    patch = Patch()
-
     algo = MyAlgo(software)
-    algo.run(patch)
+    algo.run()
 
     print()
     print('===== Finish =====')

@@ -1,8 +1,7 @@
 from abc import abstractmethod
-from copy import deepcopy
-from random import random
-from time import time
-from collections import deque
+import copy
+import time
+import collections
 from ..base import AbstractAlgorithm
 
 class TabuSearch(AbstractAlgorithm):
@@ -10,21 +9,21 @@ class TabuSearch(AbstractAlgorithm):
         super().__init__(software)
         self.stats.update({'iteration': 0, 'steps': 0})
         self.config['tabu_length'] = 10
-        self.tabu = deque()
+        self.tabu = collections.deque()
 
-    def run(self, initial_sol):
+    def run(self):
         # start!
-        self.stats['wallclock_start'] = time()
-        self.do_run(initial_sol)
-        if not initial_sol in self.fails:
-            self.best = initial_sol
+        self.stats['wallclock_start'] = time.time()
+        self.do_run(self.initial)
+        if not self.initial in self.fails:
+            self.best = copy.deepcopy(self.initial)
             print('initial: {}'.format(self.fitness(self.best)))
         else:
             print('initial solution has failed')
             return
 
         # main loop
-        current = deepcopy(self.best)
+        current = copy.deepcopy(self.best)
         self.make_tabu(current)
         self.stats['iteration'] += 1
         print()
@@ -48,7 +47,7 @@ class TabuSearch(AbstractAlgorithm):
                 print('current {}'.format(self.fitness(current)))
                 self.make_tabu(current)
                 if self.fit_dominates(current, self.best):
-                    self.best = deepcopy(current)
+                    self.best = copy.deepcopy(current)
                     print('new BEST! {}'.format(self.fitness(self.best)))
             else: # restart
                 self.stats['iteration'] += 1
@@ -56,14 +55,14 @@ class TabuSearch(AbstractAlgorithm):
                 print('===== Iteration {} ====='.format(self.stats['iteration']))
                 print('*** restart ***')
                 self.stats['steps'] += 1
-                current = deepcopy(initial_sol)
+                current = copy.deepcopy(self.initial)
                 self.clear_tabu()
                 self.make_tabu(current)
                 print('best: {}'.format(self.fitness(self.best)))
                 print('current: {}'.format(self.fitness(current)))
 
         # the end
-        self.stats['wallclock_end'] = time()
+        self.stats['wallclock_end'] = time.time()
         print('===== END ({:.2f}s) ====='.format(self.stats['wallclock_end'] - self.stats['wallclock_start']))
 
     @abstractmethod
@@ -82,7 +81,7 @@ class TabuSearch(AbstractAlgorithm):
         self.tabu.clear()
 
     def stopping_condition(self):
-        now = time()
+        now = time.time()
         return now > self.stats['wallclock_start'] + 30 # default: 30 seconds
 
     def break_condition(self):

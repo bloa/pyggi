@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 import copy
+from . import Patch
 
 class AbstractAlgorithm(ABC):
     def __init__(self, software):
@@ -10,6 +11,7 @@ class AbstractAlgorithm(ABC):
         self.runs = dict()
         self.tests = dict()
         self.stats = {'tests': 0, 'runs': 0}
+        self.initial = Patch()
 
     def setup(self):
         pass
@@ -37,7 +39,7 @@ class AbstractAlgorithm(ABC):
             self.fails.add(sol)
             return
         run = mutant.run()
-        if run:
+        if run is not None:
             self.runs[sol] = run
         else:
             self.fails.add(sol)

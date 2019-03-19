@@ -1,6 +1,6 @@
 import copy
 import random
-from pyggi.base import AbstractSoftware, AbstractEdit, Patch
+from pyggi.base import AbstractSoftware, AbstractEdit
 from pyggi.algorithms import RandomSearch, IteratedLocalSearch, GeneticProgramming, TabuSearch
 
 class FakeEdit(AbstractEdit):
@@ -107,8 +107,7 @@ if __name__ == "__main__":
         print('===== Start =====')
         random.seed(0)
         try:
-            patch = Patch()
-            algo.run(patch)
+            algo.run()
         finally:
             print()
             print('===== Finish =====')
