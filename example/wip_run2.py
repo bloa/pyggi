@@ -3,7 +3,7 @@ import random
 import time
 from pyggi.base import Patch
 from pyggi.algorithms import IteratedLocalSearch
-from pyggi.tree import TreeDeletion, TreeReplacement
+from pyggi.tree import TreeDeletion, TreeReplacement, TreeSwap, TreeInsertionBefore, TreeMoveBefore
 from pyggi.tree import AstorProgram
 
 class MyProgram(AstorProgram):
@@ -20,11 +20,12 @@ class MyProgram(AstorProgram):
             return time.time() - start
         return None
 
-EDITS = [TreeDeletion, TreeReplacement]
+EDITS = [TreeDeletion, TreeReplacement, TreeSwap, TreeInsertionBefore, TreeMoveBefore]
 
 class MyAlgo(IteratedLocalSearch):
     def stopping_condition(self):
-        return self.stats['steps'] >= 30
+        now = time.time()
+        return now > self.stats['wallclock_start'] + 5
 
     def neighbourhood(self, sol):
         for _ in range(100): # neighbourhood size
@@ -57,3 +58,4 @@ if __name__ == "__main__":
     soft = copy.deepcopy(software)
     algo.best.alter(soft)
     soft.write('pyggi_best')
+    print(soft.synthetise('wip_abstract.py'))

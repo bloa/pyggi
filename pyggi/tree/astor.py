@@ -19,13 +19,42 @@ class AstorProgram(TreeSoftware):
 
     def do_delete_tree(self, target):
         target_file, target_point = target
-        return astor_helper.replace(
-            (self.contents[target_file], self.modification_points[target_file][target_point]),
+        target_path = self.modification_points[target_file][target_point]
+        astor_helper.replace(
+            (self.contents[target_file], target_path),
             None)
 
     def do_replace_tree(self, target, ingredient):
         target_file, target_point = target
         ingredient_file, ingredient_point = ingredient
-        return astor_helper.replace(
-            (self.contents[target_file], self.modification_points[target_file][target_point]),
-            (self.contents[ingredient_file], self.modification_points[ingredient_file][ingredient_point]))
+        target_path = self.modification_points[target_file][target_point]
+        ingredient_path = self.modification_points[ingredient_file][ingredient_point]
+        astor_helper.replace(
+            (self.contents[target_file], target_path),
+            (self.contents[ingredient_file], ingredient_path))
+
+    def do_swap_tree(self, target, ingredient):
+        target_file, target_point = target
+        ingredient_file, ingredient_point = ingredient
+        target_path = self.modification_points[target_file][target_point]
+        ingredient_path = self.modification_points[ingredient_file][ingredient_point]
+        astor_helper.swap(
+            (self.contents[target_file], target_path),
+            (self.contents[ingredient_file], ingredient_path))
+
+    def do_insert_tree_before(self, target, ingredient):
+        target_file, target_point = target
+        ingredient_file, ingredient_point = ingredient
+        target_path = self.modification_points[target_file][target_point]
+        ingredient_path = self.modification_points[ingredient_file][ingredient_point]
+        success = astor_helper.insert_before(
+            (self.contents[target_file], target_path),
+            (self.contents[ingredient_file], ingredient_path))
+        if success:
+            depth = len(target_path)
+            parent = target_path[:depth-1]
+            index = target_path[depth-1][1]
+            for pos in self.modification_points[target_file]:
+                if parent == pos[:depth-1] and len(pos) >= depth and index <= pos[depth-1][1]:
+                    a, i = pos[depth-1]
+                    pos[depth-1] = (a, i + 1)
