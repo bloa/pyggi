@@ -1,6 +1,5 @@
 import astor
 import os
-import random
 from . import TreeSoftware
 from . import astor_helper
 
