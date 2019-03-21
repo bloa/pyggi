@@ -15,11 +15,28 @@ from pyggi.base import AbstractSoftware
 from pyggi.line import LineProgram, LineDeletion, LineReplacement, LineSwap, LineInsertionBefore, LineMoveBefore
 from pyggi.tree import AstorProgram, XmlProgram, TreeDeletion, TreeReplacement, TreeSwap, TreeInsertionBefore, TreeMoveBefore
 
+# some toplevel constants
+LINE_EDITS = [LineDeletion, LineReplacement, LineSwap, LineInsertionBefore, LineMoveBefore]
+TREE_EDITS = [TreeDeletion, TreeReplacement, TreeSwap, TreeInsertionBefore, TreeMoveBefore]
 JAVA_XML_DIR = '../sample/quixbugs/java_xml_programs'
 JAVA_DIR = '../sample/quixbugs/java_programs'
 PYTHON_DIR = '../sample/quixbugs/python_programs'
 JSON_DIR = '../sample/quixbugs/json_testcases'
 
+# the same algorithm for every scenario
+class MyAlgo(RandomSearch):
+    def stopping_condition(self):
+        now = time.time()
+        return self.fitness(self.best) == 0 or now > self.stats['wallclock_start'] + 30
+
+    def mutate(self, sol):
+        if len(sol) > 1 and random.random() > 0.5:
+            sol.edits.pop(int(random.random()*len(sol)))
+        else:
+            sol.edits.append(random.choice(self.edits).create(self.software))
+        return sol
+
+# how to run python programs
 class BasePythonProgram(AbstractSoftware):
     def test(self):
         (algo, _) = os.path.splitext(self.config['target_files'][0])
@@ -62,6 +79,7 @@ class BasePythonProgram(AbstractSoftware):
                 sys.stderr = sys.__stderr__
         return n
 
+# how to run java programs
 class BaseJavaProgram(AbstractSoftware):
     def test(self):
         cwd = os.getcwd()
@@ -112,42 +130,19 @@ class BaseJavaProgram(AbstractSoftware):
             os.chdir(cwd)
         return n
 
+# program mixins
+# could probably be donne better...
 class PythonLineProgram(BasePythonProgram, LineProgram):
     pass
-
 class PythonTreeProgram(BasePythonProgram, AstorProgram):
     pass
-
 class JavaLineProgram(BaseJavaProgram, LineProgram):
     pass
-
 class JavaTreeProgram(BaseJavaProgram, XmlProgram):
     pass
 
-LINE_EDITS = [LineDeletion, LineReplacement, LineSwap, LineInsertionBefore, LineMoveBefore]
-TREE_EDITS = [TreeDeletion, TreeReplacement, TreeSwap, TreeInsertionBefore, TreeMoveBefore]
-
-class LineAlgo(RandomSearch):
-    def stopping_condition(self):
-        now = time.time()
-        return self.fitness(self.best) == 0 or now > self.stats['wallclock_start'] + 30
-
-    def mutate(self, sol):
-        if len(sol) > 1 and random.random() > 0.5:
-            sol.edits.pop(int(random.random()*len(sol)))
-        else:
-            sol.edits.append(random.choice(LINE_EDITS).create(self.software))
-        return sol
-
-class TreeAlgo(LineAlgo):
-    def mutate(self, sol):
-        if len(sol) > 1 and random.random() > 0.5:
-            sol.edits.pop(int(random.random()*len(sol)))
-        else:
-            sol.edits.append(random.choice(TREE_EDITS).create(self.software))
-        return sol
-
-def repair(jsonfile, bugfile, program_cls, algo_cls, path):
+# the main repair function
+def repair(jsonfile, bugfile, program_cls, edits, path):
     print('===== {} ====='.format(bugfile))
     content = open('../sample/quixbugs/json_testcases/{}'.format(jsonfile), 'r')
     acc = list()
@@ -161,7 +156,8 @@ def repair(jsonfile, bugfile, program_cls, algo_cls, path):
     }
 
     software = program_cls(config)
-    algo = algo_cls(software)
+    algo = MyAlgo(software)
+    algo.edits = edits
     algo.run()
 
     print(algo.stats)
@@ -195,20 +191,20 @@ if __name__ == "__main__":
         if args.lang == 'java':
             if args.mode == 'line':
                 tmp = repair(filename, '{}.java'.format(basename.upper()),
-                             JavaLineProgram, LineAlgo, JAVA_DIR)
+                             JavaLineProgram, LINE_EDITS, JAVA_DIR)
             elif args.mode == 'tree':
                 tmp = repair(filename, '{}.java.xml'.format(basename.upper()),
-                             JavaTreeProgram, TreeAlgo, JAVA_XML_DIR)
+                             JavaTreeProgram, TREE_EDITS, JAVA_XML_DIR)
             else:
                 print('invalid java mode ({})'.format(args.mode))
                 exit(1)
         elif args.lang == 'python':
             if args.mode == 'line':
                 tmp = repair(filename, '{}.py'.format(basename),
-                             PythonLineProgram, LineAlgo, PYTHON_DIR)
+                             PythonLineProgram, LINE_EDITS, PYTHON_DIR)
             elif args.mode == 'tree':
                 tmp = repair(filename, '{}.py'.format(basename),
-                             PythonTreeProgram, TreeAlgo, PYTHON_DIR)
+                             PythonTreeProgram, TREE_EDITS, PYTHON_DIR)
             else:
                 print('invalid python mode ({})'.format(args.mode))
                 exit(1)
