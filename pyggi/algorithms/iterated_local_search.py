@@ -5,9 +5,11 @@ import time
 from ..base import AbstractAlgorithm
 
 class IteratedLocalSearch(AbstractAlgorithm):
-    def __init__(self, software):
-        super().__init__(software)
-        self.stats.update({'iteration': 0, 'steps': 0, 'cons_worse': 0, 'cons_tabu': 0})
+    def setup(self):
+        self.stats['iteration'] = 0
+        self.stats['steps'] = 0
+        self.stats['cons_worse'] = 0
+        self.stats['cons_tabu'] = 0
         self.config['perturb_length'] = 3
 
     def run(self):

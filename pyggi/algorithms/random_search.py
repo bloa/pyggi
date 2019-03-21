@@ -6,9 +6,8 @@ from collections import deque
 from ..base import AbstractAlgorithm
 
 class RandomSearch(AbstractAlgorithm):
-    def __init__(self, software):
-        super().__init__(software)
-        self.stats.update({'steps': 0})
+    def setup(self):
+        self.stats['steps'] = 0
         self.config['adaptive'] = False
         self.config['dist_max'] = 10
 

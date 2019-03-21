@@ -12,6 +12,7 @@ class AbstractAlgorithm(ABC):
         self.tests = dict()
         self.stats = {'tests': 0, 'runs': 0}
         self.initial = Patch()
+        self.setup()
 
     def setup(self):
         pass

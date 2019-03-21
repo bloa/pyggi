@@ -5,8 +5,8 @@ import time
 from ..base import AbstractAlgorithm
 
 class GeneticProgramming(AbstractAlgorithm):
-    def __init__(self, software):
-        super().__init__(software)
+    def setup(self):
+        super().setup()
         self.stats.update({'generation': 0})
         self.config['pop_size'] = 10
 

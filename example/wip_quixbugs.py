@@ -25,9 +25,13 @@ JSON_DIR = '../sample/quixbugs/json_testcases'
 
 # the same algorithm for every scenario
 class MyAlgo(RandomSearch):
+    def setup(self):
+        super().setup()
+        self.config['dist_max'] = 3
+
     def stopping_condition(self):
         now = time.time()
-        return self.fitness(self.best) == 0 or now > self.stats['wallclock_start'] + 30
+        return self.fitness(self.best) == 0 or now > self.stats['wallclock_start'] + 5
 
     def mutate(self, sol):
         if len(sol) > 1 and random.random() > 0.5:

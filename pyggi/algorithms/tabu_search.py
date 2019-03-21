@@ -5,8 +5,7 @@ import collections
 from ..base import AbstractAlgorithm
 
 class TabuSearch(AbstractAlgorithm):
-    def __init__(self, software):
-        super().__init__(software)
+    def setup(self):
         self.stats.update({'iteration': 0, 'steps': 0})
         self.config['tabu_length'] = 10
         self.tabu = collections.deque()
