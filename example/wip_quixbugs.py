@@ -135,7 +135,7 @@ class BaseJavaProgram(AbstractSoftware):
         return n
 
 # program mixins
-# could probably be donne better...
+# could probably be done better...
 class PythonLineProgram(BasePythonProgram, LineProgram):
     pass
 class PythonTreeProgram(BasePythonProgram, AstorProgram):
