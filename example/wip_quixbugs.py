@@ -1,20 +1,26 @@
+import argparse
 import copy
 import inspect
 import importlib
 import json
 import os
 import random
+import shutil
 import signal
+import subprocess
 import sys
 import time
-from pyggi.algorithms import IteratedLocalSearch
-from pyggi.line import LineDeletion, LineReplacement, LineSwap, LineInsertionBefore, LineMoveBefore
-from pyggi.line import LineProgram
+from pyggi.algorithms import RandomSearch
+from pyggi.base import AbstractSoftware
+from pyggi.line import LineProgram, LineDeletion, LineReplacement, LineSwap, LineInsertionBefore, LineMoveBefore
+from pyggi.tree import AstorProgram, XmlProgram, TreeDeletion, TreeReplacement, TreeSwap, TreeInsertionBefore, TreeMoveBefore
 
+JAVA_XML_DIR = '../sample/quixbugs/java_xml_programs'
+JAVA_DIR = '../sample/quixbugs/java_programs'
 PYTHON_DIR = '../sample/quixbugs/python_programs'
 JSON_DIR = '../sample/quixbugs/json_testcases'
 
-class MyProgram(LineProgram):
+class BasePythonProgram(AbstractSoftware):
     def test(self):
         (algo, _) = os.path.splitext(self.config['target_files'][0])
         # todo: change "/" to "." with re
@@ -38,13 +44,17 @@ class MyProgram(LineProgram):
             if not isinstance(test_input, list):
                 test_input = [test_input]
             try:
-                sys.stdout = None
-                sys.stderr = None
-                signal.signal(signal.SIGALRM, lambda _,__: 1/0)
-                signal.setitimer(signal.ITIMER_REAL, 0.01)
-                if self.fx(*test_input) == test_output:
-                    n -= 1
-            except:
+                try:
+                    sys.stdout = None
+                    sys.stderr = None
+                    signal.signal(signal.SIGALRM, lambda _,__: 1/0)
+                    signal.setitimer(signal.ITIMER_REAL, 0.1)
+                    if self.fx(*test_input) == test_output:
+                        n -= 1
+                    pass
+                except Exception: # to catch errors
+                    pass
+            except Exception: # to catch timeouts
                 pass
             finally:
                 signal.alarm(0)
@@ -52,57 +62,169 @@ class MyProgram(LineProgram):
                 sys.stderr = sys.__stderr__
         return n
 
-EDITS = [LineDeletion, LineReplacement, LineSwap, LineInsertionBefore, LineMoveBefore]
+class BaseJavaProgram(AbstractSoftware):
+    def test(self):
+        cwd = os.getcwd()
+        try:
+            os.chdir(self.path)
+            try:
+                javafile = self.config['target_files'][0]
+                if javafile[-4:] == '.xml':
+                    javafile = javafile[:-4]
+                sprocess = subprocess.Popen(["/usr/bin/javac", javafile, '-Xlint:unchecked'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                stdout, stderr = sprocess.communicate(timeout=2)
+                return sprocess.returncode == 0
+            except subprocess.TimeoutExpired:
+                return False
+            finally:
+                if sprocess.poll():
+                    sprocess.terminate()
+                    sprocess.wait()
+        finally:
+            os.chdir(cwd)
 
-class MyAlgo(IteratedLocalSearch):
+    def run(self):
+        cwd = os.getcwd()
+        n = len(self.config['test_cases'])
+        try:
+            os.chdir(self.path)
+            os.mkdir('./java_programs')
+            javafile = self.config['target_files'][0]
+            if javafile[-4:] == '.xml':
+                javafile = javafile[:-4]
+            shutil.copy(javafile[:-5]+'.class', 'java_programs')
+            for test_case in self.config['test_cases']:
+                test_input, test_output = copy.deepcopy(test_case)
+                if not isinstance(test_input, list):
+                    test_input = [test_input]
+                try:
+                    sprocess = subprocess.Popen(["/usr/bin/java", "-cp", "gson-2.8.2.jar:.", "JavaDeserialization", javafile[:-5].lower()]+[json.dumps(arg) for arg in copy.deepcopy(test_input)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    stdout, stderr = sprocess.communicate(timeout=0.1)
+                    if stdout.decode("ascii").rstrip() == str(test_output):
+                        n -= 1
+                except subprocess.TimeoutExpired:
+                    pass
+                finally:
+                    if sprocess.poll():
+                        sprocess.terminate()
+                        sprocess.wait()
+        finally:
+            os.chdir(cwd)
+        return n
+
+class PythonLineProgram(BasePythonProgram, LineProgram):
+    pass
+
+class PythonTreeProgram(BasePythonProgram, AstorProgram):
+    pass
+
+class JavaLineProgram(BaseJavaProgram, LineProgram):
+    pass
+
+class JavaTreeProgram(BaseJavaProgram, XmlProgram):
+    pass
+
+LINE_EDITS = [LineDeletion, LineReplacement, LineSwap, LineInsertionBefore, LineMoveBefore]
+TREE_EDITS = [TreeDeletion, TreeReplacement, TreeSwap, TreeInsertionBefore, TreeMoveBefore]
+
+class LineAlgo(RandomSearch):
     def stopping_condition(self):
         now = time.time()
-        return self.fitness(self.best) == 0 or now > self.stats['wallclock_start'] + 1
-
-    def neighbourhood(self, sol):
-        for _ in range(100): # neighbourhood size
-            c = copy.deepcopy(sol)
-            yield self.mutate(c)
+        return self.fitness(self.best) == 0 or now > self.stats['wallclock_start'] + 30
 
     def mutate(self, sol):
         if len(sol) > 1 and random.random() > 0.5:
             sol.edits.pop(int(random.random()*len(sol)))
         else:
-            sol.edits.append(random.choice(EDITS).create(self.software))
+            sol.edits.append(random.choice(LINE_EDITS).create(self.software))
         return sol
 
+class TreeAlgo(LineAlgo):
+    def mutate(self, sol):
+        if len(sol) > 1 and random.random() > 0.5:
+            sol.edits.pop(int(random.random()*len(sol)))
+        else:
+            sol.edits.append(random.choice(TREE_EDITS).create(self.software))
+        return sol
+
+def repair(jsonfile, bugfile, program_cls, algo_cls, path):
+    print('===== {} ====='.format(bugfile))
+    content = open('../sample/quixbugs/json_testcases/{}'.format(jsonfile), 'r')
+    acc = list()
+    for line in content:
+        acc.append(json.loads(line))
+
+    config = {
+        'path': path,
+        'target_files': [bugfile],
+        'test_cases': acc,
+    }
+
+    software = program_cls(config)
+    algo = algo_cls(software)
+    algo.run()
+
+    print(algo.stats)
+    print()
+    if algo.fit_dominates(algo.best, algo.initial):
+        soft = copy.deepcopy(software)
+        algo.best.alter(soft)
+        return (
+            bugfile,
+            algo.best,
+            algo.fitness(algo.initial),
+            software.synthetise(bugfile),
+            algo.fitness(algo.best),
+            soft.synthetise(bugfile),
+        )
+
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--lang', type=str, default='python')
+    parser.add_argument('--mode', type=str, default='line')
+    parser.add_argument('--target', type=str, default='gcd')
+    args = parser.parse_args()
+
     json_files = os.listdir(JSON_DIR)
     success = list()
+    target = args.target+'.json'
     for filename in json_files:
-        (name, _) = os.path.splitext(filename)
-        print('===== {} ====='.format(name))
-        content = open('../sample/quixbugs/json_testcases/{}.json'.format(name), 'r')
-        acc = list()
-        for line in content:
-            acc.append(json.loads(line))
-
-        config = {
-            'path': PYTHON_DIR,
-            'target_files': ['{}.py'.format(name)],
-            'test_cases': acc,
-        }
-
-        software = MyProgram(config)
-        algo = MyAlgo(software)
-        algo.run()
-
-        print()
-        print('===== Finish =====')
-        print(algo.stats)
-        print('best fitness:', algo.fitness(algo.best))
-        print(algo.best)
-        print()
-        if algo.fit_dominates(algo.best, algo.initial):
-            success.append(filename)
-            print('Success(es?!):', success)
-            soft = copy.deepcopy(software)
-            algo.best.alter(soft)
-            print(soft)
+        (basename, _) = os.path.splitext(filename)
+        if args.target != '' and basename != args.target:
+            continue
+        if args.lang == 'java':
+            if args.mode == 'line':
+                tmp = repair(filename, '{}.java'.format(basename.upper()),
+                             JavaLineProgram, LineAlgo, JAVA_DIR)
+            elif args.mode == 'tree':
+                tmp = repair(filename, '{}.java.xml'.format(basename.upper()),
+                             JavaTreeProgram, TreeAlgo, JAVA_XML_DIR)
+            else:
+                print('invalid java mode ({})'.format(args.mode))
+                exit(1)
+        elif args.lang == 'python':
+            if args.mode == 'line':
+                tmp = repair(filename, '{}.py'.format(basename),
+                             PythonLineProgram, LineAlgo, PYTHON_DIR)
+            elif args.mode == 'tree':
+                tmp = repair(filename, '{}.py'.format(basename),
+                             PythonTreeProgram, TreeAlgo, PYTHON_DIR)
+            else:
+                print('invalid python mode ({})'.format(args.mode))
+                exit(1)
+        else:
+            print('error: invalid lang ({})'.format(repr(args.lang)))
+            exit(1)
+        if tmp is not None:
+            success.append(tmp)
     print()
-    print('Success(es?!):', success)
+
+    for filename, best, fit1, soft1, fit2, soft2 in success:
+        print('=====================')
+        print('{}: {} --> {}'.format(filename, fit1, fit2))
+        print(best)
+        print('----------')
+        print(soft1)
+        print('----------')
+        print(soft2)
+        print()
