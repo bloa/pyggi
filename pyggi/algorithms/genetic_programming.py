@@ -19,9 +19,11 @@ class GeneticProgramming(AbstractAlgorithm):
         self.do_run(self.initial)
         if not self.initial in self.fails:
             self.best = copy.deepcopy(self.initial)
-            print('initial: {}'.format(self.fitness(self.best)))
+            if self.verbose > 0:
+                print('initial: {}'.format(self.fitness(self.best)))
         else:
-            print('initial solution has failed')
+            if self.verbose > 0:
+                print('initial solution has failed')
             return
 
         # initial pop
@@ -30,24 +32,30 @@ class GeneticProgramming(AbstractAlgorithm):
             sol = self.mutate(copy.deepcopy(self.initial))
             pop.append(sol)
 
-        print()
-        print('===== Generation {} ====='.format(self.stats['generation']))
+        if self.verbose > 0:
+            print()
+            print('===== Generation {} ====='.format(self.stats['generation']))
         # compute fitness
         tmp = None
         for sol in pop:
             self.do_run(sol)
-            print(self.fitness(sol))
+            if self.verbose > 1:
+                print(self.fitness(sol), sol)
+            elif self.verbose > 0:
+                print(self.fitness(sol))
             if self.fit_dominates(sol, tmp):
                 tmp = sol
         if self.fit_dominates(tmp, self.best):
-            print('new BEST! {}'.format(self.fitness(tmp)))
+            if self.verbose > 0:
+                print('new BEST!', self.fitness(tmp))
             self.best = copy.deepcopy(tmp)
 
         # main loop
         while not self.stopping_condition():
             self.stats['generation'] += 1
-            print()
-            print('===== Generation {} ====='.format(self.stats['generation']))
+            if self.verbose > 0:
+                print()
+                print('===== Generation {} ====='.format(self.stats['generation']))
             offsprings = list()
             parents = self.select(pop)
             # crossover
@@ -68,16 +76,21 @@ class GeneticProgramming(AbstractAlgorithm):
             tmp = None
             for sol in pop:
                 self.do_run(sol)
-                print(self.fitness(sol))
+                if self.verbose > 1:
+                    print(self.fitness(sol), sol)
+                elif self.verbose > 0:
+                    print(self.fitness(sol))
                 if self.fit_dominates(sol, tmp):
                     tmp = sol
             if self.fit_dominates(tmp, self.best):
-                print('new BEST! {}'.format(self.fitness(tmp)))
+                if self.verbose > 0:
+                    print('new BEST!', self.fitness(tmp))
                 self.best = copy.deepcopy(tmp)
 
         # the end
         self.stats['wallclock_end'] = time.time()
-        print('===== END ({:.2f}s) ====='.format(self.stats['wallclock_end'] - self.stats['wallclock_start']))
+        if self.verbose > 0:
+            print('===== END ({:.2f}s) ====='.format(self.stats['wallclock_end'] - self.stats['wallclock_start']))
 
     @abstractmethod
     def select(self, pop):

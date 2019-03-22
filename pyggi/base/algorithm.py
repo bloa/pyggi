@@ -12,6 +12,7 @@ class AbstractAlgorithm(ABC):
         self.tests = dict()
         self.stats = {'tests': 0, 'runs': 0}
         self.initial = Patch()
+        self.verbose = 1
         self.setup()
 
     def setup(self):
@@ -23,7 +24,6 @@ class AbstractAlgorithm(ABC):
         return None
 
     def dominates(self, before, after):
-        # print('dominates?', before, after)
         return (before is not None) and ((after is None) or (before < after))
 
     def fit_dominates(self, sol_before, sol_after):
@@ -31,6 +31,8 @@ class AbstractAlgorithm(ABC):
 
     def do_run(self, sol, detail=1):
         if sol in self.runs or sol in self.fails:
+            if self.verbose > 1:
+                print('... already in cache')
             return
         self.stats['tests'] += 1
         mutant = copy.deepcopy(self.software)
@@ -38,10 +40,14 @@ class AbstractAlgorithm(ABC):
         mutant.ready()
         if not mutant.test():
             self.fails.add(sol)
+            if self.verbose > 1:
+                print('... test failed')
             return
         run = mutant.run()
         if run is not None:
             self.runs[sol] = run
         else:
             self.fails.add(sol)
+            if self.verbose > 1:
+                print('... run failed')
         self.stats['runs'] += 1

@@ -17,9 +17,11 @@ class RandomSearch(AbstractAlgorithm):
         self.do_run(self.initial)
         if not self.initial in self.fails:
             self.best = copy.deepcopy(self.initial)
-            print('initial: {}'.format(self.fitness(self.best)))
+            if self.verbose > 0:
+                print('initial:', self.fitness(self.best))
         else:
-            print('initial solution has failed')
+            if self.verbose > 0:
+                print('initial solution has failed')
             return
 
         # main loop
@@ -31,18 +33,22 @@ class RandomSearch(AbstractAlgorithm):
             current = copy.deepcopy(self.best if self.config['adaptive'] else self.initial)
             for _ in range(dist):
                 current = self.mutate(current)
+            if self.verbose > 1:
+                print('trying:', current)
 
             # compare
             self.do_run(current)
             if self.fit_dominates(current, self.best):
                 self.best = copy.deepcopy(current)
-                print('new BEST! {}'.format(self.fitness(self.best)))
-            # else:
-            #     print('rejected: {} > {}'.format(self.fitness(current), self.fitness(self.best)))
+                if self.verbose > 0:
+                    print('new BEST!', self.fitness(self.best))
+            elif self.verbose > 1:
+                print('rejected: {} (best: {})'.format(self.fitness(current), self.fitness(self.best)))
 
         # the end
         self.stats['wallclock_end'] = time.time()
-        print('===== END ({:.2f}s) ====='.format(self.stats['wallclock_end'] - self.stats['wallclock_start']))
+        if self.verbose > 0:
+            print('===== END ({:.2f}s) ====='.format(self.stats['wallclock_end'] - self.stats['wallclock_start']))
 
     @abstractmethod
     def mutate(self, sol):

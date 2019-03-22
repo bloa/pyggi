@@ -18,9 +18,11 @@ class IteratedLocalSearch(AbstractAlgorithm):
         self.do_run(self.initial)
         if not self.initial in self.fails:
             self.best = copy.deepcopy(self.initial)
-            print('initial: {}'.format(self.fitness(self.best)))
+            if self.verbose > 0:
+                print('initial:', self.fitness(self.best))
         else:
-            print('initial solution has failed')
+            if self.verbose > 0:
+                print('initial solution has failed')
             return
 
         # main loop
@@ -28,14 +30,17 @@ class IteratedLocalSearch(AbstractAlgorithm):
         while not self.stopping_condition():
             self.stats['iteration'] += 1
             self.stats['steps'] += 1
-            print()
-            print('===== Iteration {} ====='.format(self.stats['iteration']))
+            if self.verbose > 0:
+                print()
+                print('===== Iteration {} ====='.format(self.stats['iteration']))
             # restart or perturb
             if self.restart_condition():
-                print('*** restart ***')
+                if self.verbose > 0:
+                    print('*** restart ***')
                 current = copy.deepcopy(self.initial)
             elif self.perturb_condition():
-                print('*** perturb ***')
+                if self.verbose > 0:
+                    print('*** perturb ***')
                 tries = 3
                 while tries > 0:
                     tries -= 1
@@ -45,11 +50,13 @@ class IteratedLocalSearch(AbstractAlgorithm):
                         current = tmp
                         break
                 else: # restart
-                    print('perturb failed')
-                    print('*** restart ***')
+                    if self.verbose > 0:
+                        print('... perturb failed')
+                        print('*** restart ***')
                     current = copy.deepcopy(self.initial)
-            print('best: {}'.format(self.fitness(self.best)))
-            print('current: {}'.format(self.fitness(current)))
+            if self.verbose > 0:
+                print('best:', self.fitness(self.best))
+                print('current:', self.fitness(current))
 
             # descent
             tabu = set()
@@ -67,25 +74,31 @@ class IteratedLocalSearch(AbstractAlgorithm):
                     self.stats['cons_tabu'] = 0
                     tabu.add(neighbour)
                     self.stats['steps'] += 1
+                    if self.verbose > 1:
+                        print('trying:', neighbour)
                     self.do_run(neighbour)
                     if self.accept(current, neighbour):
-                        print('current {}'.format(self.fitness(neighbour)))
+                        if self.verbose > 0:
+                            print('current:', self.fitness(neighbour))
                         current = neighbour
                         self.stats['cons_worse'] = 0
                         if self.fit_dominates(current, self.best):
-                            print('new BEST! {}'.format(self.fitness(current)))
+                            if self.verbose > 0:
+                                print('new BEST!', self.fitness(current))
                             self.best = copy.deepcopy(current)
 
                         break
                     else:
                         self.stats['cons_worse'] += 1
-                        # print('rejected: {} > {}'.format(self.fitness(neighbour), self.fitness(current)))
+                        if self.verbose > 1:
+                            print('rejected: {} (best: {})'.format(self.fitness(neighbour), self.fitness(current)))
                 if self.break_condition() or self.stats['cons_worse'] > 0:
                     break
 
         # the end
         self.stats['wallclock_end'] = time.time()
-        print('===== END ({:.2f}s) ====='.format(self.stats['wallclock_end'] - self.stats['wallclock_start']))
+        if self.verbose > 0:
+            print('===== END ({:.2f}s) ====='.format(self.stats['wallclock_end'] - self.stats['wallclock_start']))
 
     @abstractmethod
     def neighbourhood(self, sol):
