@@ -95,7 +95,7 @@ class BaseJavaProgram(AbstractSoftware):
                     javafile = javafile[:-4]
                 sprocess = subprocess.Popen(["/usr/bin/javac", javafile, '-Xlint:unchecked'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 stdout, stderr = sprocess.communicate(timeout=2)
-                return sprocess.returncode == 0
+                return sprocess.returncode == 0 and os.path.isfile('{}.class'.format(javafile[:-5]))
             except subprocess.TimeoutExpired:
                 return False
             finally:
