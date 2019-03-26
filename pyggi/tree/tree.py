@@ -20,37 +20,22 @@ class TreeSoftware(Software):
 
 
 class TreeDeletion(TargetEdit):
-    def __str__(self):
-        return 'TreeDeletion({})'.format(self.target)
-
     def alter(self, software):
         software.do_delete_tree(self.target)
 
 class TreeReplacement(TargetIngredientEdit):
-    def __str__(self):
-        return 'TreeReplacement({}, {})'.format(self.target, self.ingredient)
-
     def alter(self, software):
         software.do_replace_tree(self.target, self.ingredient)
 
 class TreeSwap(TargetIngredientEdit):
-    def __str__(self):
-        return 'TreeSwap({}, {})'.format(self.target, self.ingredient)
-
     def alter(self, software):
         software.do_swap_tree(self.target, self.ingredient)
 
 class TreeInsertionBefore(TargetIngredientEdit):
-    def __str__(self):
-        return 'TreeInsertionBefore({}, {})'.format(self.target, self.ingredient)
-
     def alter(self, software):
         software.do_insert_tree_before(self.target, self.ingredient)
 
 class TreeMoveBefore(TargetIngredientEdit):
-    def __str__(self):
-        return 'TreeMoveBefore({}, {})'.format(self.target, self.ingredient)
-
     def alter(self, software):
         software.do_insert_tree_before(self.target, self.ingredient)
         software.do_delete_tree(self.ingredient)
