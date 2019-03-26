@@ -107,3 +107,5 @@ class Software(AbstractSoftware):
         target_point = random.choice(range(len(self.modification_points[target_file])))
         return (target_file, target_point)
 
+    def random_ingredient(self):
+        return self.random_target()
