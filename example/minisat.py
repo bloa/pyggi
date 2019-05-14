@@ -112,10 +112,13 @@ class MyProgram(AbstractProgram):
         # self.instances = INSTANCES[0][:5]
         draw = enumerate([5, 5, 2, 2, 1])
         self.instances = [inst for (i, k) in draw for inst in random.sample(INSTANCES[i], k)]
+        self.instances_folder = os.path.join(os.getcwd(), '..', 'sat_cit')
         # self.instances = [inst for subset in INSTANCES for inst in subset]
         self.truth_table = {}
         self.base_fitness = None
         self.cache = {}
+        self.compile_timeout = 10
+        self.instance_timeout = 60
 
     def evaluate_patch(self, patch, timeout=15):
         # memoise run results
@@ -136,7 +139,7 @@ class MyProgram(AbstractProgram):
             os.chdir(os.path.join(self.tmp_path, 'simp'))
             try:
                 sprocess = subprocess.Popen('make', stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                stdout, stderr = sprocess.communicate(timeout=timeout)
+                stdout, stderr = sprocess.communicate(timeout=min(timeout,self.compile_timeout))
                 if sprocess.returncode and sprocess.returncode > 0:
                     if self.base_fitness is None:
                         print(stderr.decode('utf8'))
@@ -155,14 +158,14 @@ class MyProgram(AbstractProgram):
                 try:
                     now = time.time()
                     budget = timeout + start - now
-                    sprocess = subprocess.Popen([os.path.join('.', 'simp', 'minisat'), os.path.join(cwd, '..', 'sat_cit', inst)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                    stdout, stderr = sprocess.communicate(timeout=budget)
+                    sprocess = subprocess.Popen([os.path.join('.', 'simp', 'minisat'), os.path.join(self.instances_folder, inst)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    stdout, stderr = sprocess.communicate(timeout=min(budget,self.instance_timeout))
                     if sprocess.returncode not in [10, 20]:
-                        self.logger.debug('RUNTIME_ERROR({}/{})'.format(i, len(self.instances)))
+                        self.logger.debug('RUNTIME_ERROR({}/{},{})'.format(i, len(self.instances), inst))
                         return StatusCode.PARSE_ERROR, 'FAIL' # RUNTIME_ERROR?
                     try:
                         if (sprocess.returncode == 10) != self.truth_table[inst]:
-                            self.logger.debug('OUTPUT_ERROR({}/{})'.format(i, len(self.instances)))
+                            self.logger.debug('OUTPUT_ERROR({}/{},{})'.format(i, len(self.instances), inst))
                             return StatusCode.PARSE_ERROR, 'FAIL' # OUTPUT_ERROR?
                     except KeyError:
                         self.logger.info('TRUTH: {} is {} in {}'.format(inst, ('SAT' if sprocess.returncode == 10 else 'UNSAT'), time.time() - now))
@@ -171,11 +174,14 @@ class MyProgram(AbstractProgram):
                         fit = self.compute_fitness(0, stdout.decode('ascii'), stderr.decode('ascii'))
                         outputs.append(fit)
                     except ParseError:
-                        self.logger.debug('PARSE_ERROR({}/{})'.format(i, len(self.instances)))
+                        self.logger.debug('PARSE_ERROR({}/{},{})'.format(i, len(self.instances), inst))
                         return StatusCode.PARSE_ERROR, 'RUN'
                 except subprocess.TimeoutExpired:
                     sprocess.kill()
-                    self.logger.debug('TIMEOUT({}/{})'.format(i, len(self.instances)))
+                    if budget > self.instance_timeout:
+                        self.logger.debug('INSTANCE_TIMEOUT({}/{},{})'.format(i, len(self.instances), inst))
+                    else:
+                        self.logger.debug('BUDGET_TIMEOUT({}/{},{})'.format(i, len(self.instances), inst))
                     return StatusCode.TIME_OUT, 'RUN'
         finally:
             os.chdir(cwd)
