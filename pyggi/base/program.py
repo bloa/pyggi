@@ -235,7 +235,7 @@ class AbstractProgram(ABC):
         """
         return self.engines[file_name].dump(contents[file_name])
 
-    def get_modified_contents(self, patch):
+    def get_modified_contents(self, patch, minify=True):
         target_files = self.contents.keys()
         modification_points = copy.deepcopy(self.modification_points)
         new_contents = copy.deepcopy(self.contents)
@@ -243,6 +243,8 @@ class AbstractProgram(ABC):
             edits = list(filter(lambda a: a.target[0] == target_file, patch.edit_list))
             for edit in edits:
                 edit.apply(self, new_contents, modification_points)
+            if minify and not edits:
+                del new_contents[target_file]
         return new_contents
 
     def apply(self, patch):
@@ -306,7 +308,7 @@ class AbstractProgram(ABC):
         :rtype: str
         """
         diffs = ''
-        new_contents = self.get_modified_contents(patch)
+        new_contents = self.get_modified_contents(patch, minify=False)
         for file_name in self.target_files:
             orig = self.dump(self.contents, file_name)
             modi = self.dump(new_contents, file_name)
