@@ -95,7 +95,7 @@ class TestEdit(object):
             program = LineProgram('../sample/Triangle_bug_java')
             modification_points = copy.deepcopy(program.modification_points)
             new_contents = copy.deepcopy(program.contents)
-            line_replacement.apply(program, new_contents, modification_points)
+            line_replacement.apply(program, new_contents, modification_points, {})
             assert program.contents[ingredient[0]][ingredient[1]] == new_contents[target[0]][target[1]]
             assert program.modification_points[target[0]] != len(modification_points[target[0]])
             assert program.contents != new_contents
@@ -121,7 +121,7 @@ class TestEdit(object):
             program = LineProgram('../sample/Triangle_bug_java')
             modification_points = copy.deepcopy(program.modification_points)
             new_contents = copy.deepcopy(program.contents)
-            line_insertion.apply(program, new_contents, modification_points)
+            line_insertion.apply(program, new_contents, modification_points, {})
             assert program.contents[ingredient[0]][ingredient[1]] == new_contents[target[0]][target[1]]
             assert program.modification_points[target[0]] != modification_points[target[0]]
             assert program.contents != new_contents
@@ -146,7 +146,7 @@ class TestEdit(object):
             program = LineProgram('../sample/Triangle_bug_java')
             modification_points = copy.deepcopy(program.modification_points)
             new_contents = copy.deepcopy(program.contents)
-            line_deletion.apply(program, new_contents, modification_points)
+            line_deletion.apply(program, new_contents, modification_points, {})
             assert new_contents[target[0]][target[1]] == ''
             assert program.modification_points[target[0]] == modification_points[target[0]]
 
@@ -174,7 +174,7 @@ class TestEdit(object):
             program = TreeProgram('../sample/Triangle_bug_python')
             modification_points = copy.deepcopy(program.modification_points)
             new_contents = copy.deepcopy(program.contents)
-            stmt_replacement.apply(program, new_contents, modification_points)
+            stmt_replacement.apply(program, new_contents, modification_points, {})
             assert program.modification_points[target[0]] != len(modification_points[target[0]])
             assert program.contents != new_contents
 
@@ -199,7 +199,7 @@ class TestEdit(object):
             program = TreeProgram('../sample/Triangle_bug_python')
             modification_points = copy.deepcopy(program.modification_points)
             new_contents = copy.deepcopy(program.contents)
-            stmt_insertion.apply(program, new_contents, modification_points)
+            stmt_insertion.apply(program, new_contents, modification_points, {})
             assert program.modification_points[target[0]] != modification_points[target[0]]
             assert program.contents != new_contents
 
@@ -223,5 +223,5 @@ class TestEdit(object):
             program = TreeProgram('../sample/Triangle_bug_python')
             modification_points = copy.deepcopy(program.modification_points)
             new_contents = copy.deepcopy(program.contents)
-            stmt_deletion.apply(program, new_contents, modification_points)
+            stmt_deletion.apply(program, new_contents, modification_points, {})
             assert program.modification_points[target[0]] == modification_points[target[0]]

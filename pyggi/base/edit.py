@@ -1,18 +1,8 @@
-import ast
-import inspect
 from abc import ABC, abstractmethod
 
 class AbstractEdit(ABC):
     @abstractmethod
     def __init__(self):
-        """
-        frame = inspect.currentframe()
-        args, _, _, values = inspect.getargvalues(frame)
-        for name in args:
-            if name != 'self':
-                setattr(o, name, values[name])
-        print(self.__dict__)
-        """
         pass
 
     def __eq__(self, other):
@@ -35,7 +25,7 @@ class AbstractEdit(ABC):
         return "{}({})".format(self.__class__.__name__, self.__dict__)
 
     @abstractmethod
-    def apply(self, program, new_contents, modification_points):
+    def apply(self, program, new_contents, modification_points, stacks):
         """"
         Apply the operator to the contents of program
         :param program: The original program instance

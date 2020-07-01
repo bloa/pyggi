@@ -256,11 +256,12 @@ class AbstractProgram(ABC):
         target_files = self.contents.keys()
         modification_points = copy.deepcopy(self.modification_points)
         new_contents = copy.deepcopy(self.contents)
+        stacks = {}
+        for edit in patch.edit_list:
+            edit.apply(self, new_contents, modification_points, stacks)
+        patch_targets = [edit.target[0] for edit in patch.edit_list]
         for target_file in target_files:
-            edits = list(filter(lambda a: a.target[0] == target_file, patch.edit_list))
-            for edit in edits:
-                edit.apply(self, new_contents, modification_points)
-            if minify and len(edits) == 0:
+            if minify and patch_targets.count(target_file) == 0:
                 del new_contents[target_file]
         return new_contents
 
